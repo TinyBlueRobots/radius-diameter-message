@@ -9,6 +9,7 @@ import (
 
 type Flags byte
 type Code uint32
+type VendorId uint32
 type avpData []byte
 
 type avp struct {
@@ -47,8 +48,6 @@ func (avp avp) toBytes() []byte {
 	copy(bytes[8:], avp.Data)
 	return bytes
 }
-
-type VendorId uint32
 
 type avpId struct {
 	code     Code

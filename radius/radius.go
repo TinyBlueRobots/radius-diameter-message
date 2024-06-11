@@ -7,6 +7,7 @@ import (
 )
 
 type AttributeType byte
+type VendorId uint32
 type avpData []byte
 
 type avp struct {
@@ -53,8 +54,6 @@ func (avp avp) toBytes() []byte {
 	copy(bytes[2:], avp.Data)
 	return bytes
 }
-
-type VendorId uint32
 
 type avpId struct {
 	attributeType AttributeType
