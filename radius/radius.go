@@ -13,7 +13,7 @@ type avpData []byte
 type avp struct {
 	Type     AttributeType
 	length   byte
-	vendorId VendorId
+	VendorId VendorId
 	Data     avpData
 }
 
@@ -25,7 +25,7 @@ func newAvp(attributeType AttributeType, vendorId VendorId, avpData avpData) avp
 	if vendorId == 0 {
 		a.length = byte(len(avpData) + 2)
 	} else {
-		a.vendorId = vendorId
+		a.VendorId = vendorId
 		a.length = byte(len(avpData) + 8)
 		a.Data = avpData
 	}
@@ -34,14 +34,14 @@ func newAvp(attributeType AttributeType, vendorId VendorId, avpData avpData) avp
 
 func (avp avp) toBytes() []byte {
 	bytes := make([]byte, 0)
-	if avp.vendorId == 0 {
+	if avp.VendorId == 0 {
 		bytes = append(bytes, byte(avp.Type))
 		bytes = append(bytes, avp.length)
 	} else {
 		bytes = append(bytes, 26)
 		bytes = append(bytes, avp.length)
 		buffer := make([]byte, 4)
-		binary.BigEndian.PutUint32(buffer, uint32(avp.vendorId))
+		binary.BigEndian.PutUint32(buffer, uint32(avp.VendorId))
 		bytes = append(bytes, buffer...)
 		bytes = append(bytes, byte(avp.Type))
 		bytes = append(bytes, byte(len(avp.Data)+2))
