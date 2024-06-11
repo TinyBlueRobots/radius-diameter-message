@@ -13,45 +13,40 @@ type avpData []byte
 type avp struct {
 	Type     AttributeType
 	length   byte
-	VendorId VendorId
+	vendorId VendorId
 	Data     avpData
 }
 
-func newVendorAvp(attributeType AttributeType, vendorId VendorId, avpData avpData) avp {
-	length := byte(len(avpData) + 8)
-	bytes := make([]byte, 0)
-	buffer := make([]byte, 4)
-	binary.BigEndian.PutUint32(buffer, uint32(vendorId))
-	bytes = append(bytes, buffer...)
-	bytes = append(bytes, byte(attributeType))
-	bytes = append(bytes, byte(len(avpData)+2))
-	bytes = append(bytes, avpData...)
-	return avp{
-		Type:     26,
-		length:   length,
-		VendorId: vendorId,
-		Data:     bytes,
-	}
-}
-
 func newAvp(attributeType AttributeType, vendorId VendorId, avpData avpData) avp {
-	if vendorId != 0 {
-		return newVendorAvp(attributeType, vendorId, avpData)
+	a := avp{
+		Type: attributeType,
+		Data: avpData,
 	}
-	length := byte(len(avpData) + 2)
-	return avp{
-		Type:     attributeType,
-		Data:     avpData,
-		VendorId: vendorId,
-		length:   length,
+	if vendorId == 0 {
+		a.length = byte(len(avpData) + 2)
+	} else {
+		a.vendorId = vendorId
+		a.length = byte(len(avpData) + 8)
+		a.Data = avpData
 	}
+	return a
 }
 
 func (avp avp) toBytes() []byte {
-	bytes := make([]byte, avp.length)
-	bytes[0] = byte(avp.Type)
-	bytes[1] = byte(avp.length)
-	copy(bytes[2:], avp.Data)
+	bytes := make([]byte, 0)
+	if avp.vendorId == 0 {
+		bytes = append(bytes, byte(avp.Type))
+		bytes = append(bytes, avp.length)
+	} else {
+		bytes = append(bytes, 26)
+		bytes = append(bytes, avp.length)
+		buffer := make([]byte, 4)
+		binary.BigEndian.PutUint32(buffer, uint32(avp.vendorId))
+		bytes = append(bytes, buffer...)
+		bytes = append(bytes, byte(avp.Type))
+		bytes = append(bytes, byte(len(avp.Data)+2))
+	}
+	bytes = append(bytes, avp.Data...)
 	return bytes
 }
 
@@ -160,6 +155,7 @@ func ReadAvps(bytes []byte) Avps {
 		if attributeType == 26 {
 			avpId.vendorId = VendorId(binary.BigEndian.Uint32(bytes[offset+2 : offset+6]))
 			attributeType = AttributeType(bytes[offset+6])
+			avpId.attributeType = attributeType
 			avpLength := bytes[offset+7]
 			avpData = bytes[offset+8 : offset+6+int(avpLength)]
 		} else {
