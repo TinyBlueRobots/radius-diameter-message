@@ -10,9 +10,10 @@ type AttributeType byte
 type avpData []byte
 
 type avp struct {
-	Type   AttributeType
-	length byte
-	Data   avpData
+	Type     AttributeType
+	length   byte
+	VendorId VendorId
+	Data     avpData
 }
 
 func newVendorAvp(attributeType AttributeType, vendorId VendorId, avpData avpData) avp {
@@ -25,9 +26,10 @@ func newVendorAvp(attributeType AttributeType, vendorId VendorId, avpData avpDat
 	bytes = append(bytes, byte(len(avpData)+2))
 	bytes = append(bytes, avpData...)
 	return avp{
-		Type:   26,
-		length: length,
-		Data:   bytes,
+		Type:     26,
+		length:   length,
+		VendorId: vendorId,
+		Data:     bytes,
 	}
 }
 
@@ -37,9 +39,10 @@ func newAvp(attributeType AttributeType, vendorId VendorId, avpData avpData) avp
 	}
 	length := byte(len(avpData) + 2)
 	return avp{
-		Type:   attributeType,
-		Data:   avpData,
-		length: length,
+		Type:     attributeType,
+		Data:     avpData,
+		VendorId: vendorId,
+		length:   length,
 	}
 }
 

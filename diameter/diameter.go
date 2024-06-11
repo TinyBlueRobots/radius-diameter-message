@@ -12,11 +12,12 @@ type Code uint32
 type avpData []byte
 
 type avp struct {
-	Code    Code
-	Data    avpData
-	Flags   Flags
-	padding uint32
-	length  uint32
+	Code     Code
+	Flags    Flags
+	length   uint32
+	VendorId VendorId
+	Data     avpData
+	padding  uint32
 }
 
 func newAvp(code Code, flags Flags, vendorId VendorId, avpData avpData) avp {
@@ -29,11 +30,12 @@ func newAvp(code Code, flags Flags, vendorId VendorId, avpData avpData) avp {
 		length += 4
 	}
 	return avp{
-		Code:    code,
-		Flags:   flags,
-		Data:    avpData,
-		padding: padding,
-		length:  length,
+		Code:     code,
+		Flags:    flags,
+		length:   length,
+		VendorId: vendorId,
+		Data:     avpData,
+		padding:  padding,
 	}
 }
 
