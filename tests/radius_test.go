@@ -56,3 +56,8 @@ func Test_read_message_bytes(t *testing.T) {
 	}
 	t.Fatal("Expected AVP not found")
 }
+
+func Test_radius_bytes(t *testing.T) {
+	avp := radius.NewAvp(1, 0, []byte{0x0, 0x0, 0x0, 0x1})
+	assert.Equal(t, []byte{0x1, 0x6, 0x0, 0x0, 0x0, 0x1}, avp.ToBytes())
+}

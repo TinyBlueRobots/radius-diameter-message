@@ -85,3 +85,8 @@ func Test_diameter_timestamp(t *testing.T) {
 	expected := time.Time(time.Date(2024, time.May, 15, 17, 50, 37, 0, time.Local))
 	assert.Equal(t, expected, *avp.ToTime())
 }
+
+func Test_diameter_bytes(t *testing.T) {
+	avp := diameter.NewAvp(1, 0, 0, []byte{0x0, 0x0, 0x0, 0x1})
+	assert.Equal(t, []byte{0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0xc, 0x0, 0x0, 0x0, 0x1}, avp.ToBytes())
+}
