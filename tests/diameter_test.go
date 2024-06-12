@@ -23,10 +23,10 @@ func writeUint32(value uint32) []byte {
 }
 
 func Test_diameter_message(t *testing.T) {
-	avps := make(diameter.Avps)
-	avps.Add(258, 0, mandatoryFlags, writeUint32(1))
+	avps := make(diameter.Avps, 0)
+	avps = avps.Add(258, 0, mandatoryFlags, writeUint32(1))
 	ipAddress := net.IPv4(100, 98, 179, 174).To4()
-	avps.Add(8, 0, mandatoryFlags, []byte(ipAddress))
+	avps = avps.Add(8, 0, mandatoryFlags, []byte(ipAddress))
 	message := diameter.NewMessage(1, requestFlags, 265, 1, [4]byte{0, 0, 0, 0}, [4]byte{0, 0, 0, 0}, avps)
 	bytes := message.ToBytes()
 	version := bytes[0]
@@ -62,13 +62,10 @@ func Test_diameter_grouped_avp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, avps := range diameter.ReadAvps(decodedData) {
-		avp := avps[0]
+	for _, avp := range diameter.ReadAvps(decodedData) {
 		if avp.Code == 873 {
-			for _, avps := range diameter.ReadAvps(avp.Data) {
-				avp = avps[0]
-				for _, avps := range diameter.ReadAvps(avp.Data) {
-					avp = avps[0]
+			for _, avp := range diameter.ReadAvps(avp.Data) {
+				for _, avp := range diameter.ReadAvps(avp.Data) {
 					if avp.Code == 30 {
 						assert.Equal(t, "dataconnect", *avp.ToString())
 					}

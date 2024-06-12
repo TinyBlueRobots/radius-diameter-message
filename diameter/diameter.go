@@ -49,19 +49,10 @@ func (avp avp) toBytes() []byte {
 	return bytes
 }
 
-type avpId struct {
-	code     Code
-	vendorId VendorId
-}
+type Avps []avp
 
-type Avps map[avpId][]avp
-
-func (avps Avps) Add(code Code, vendorId VendorId, flags Flags, data avpData) {
-	avpId := avpId{code, vendorId}
-	if avps[avpId] == nil {
-		avps[avpId] = make([]avp, 0)
-	}
-	avps[avpId] = append(avps[avpId], newAvp(code, flags, vendorId, data))
+func (avps Avps) Add(code Code, vendorId VendorId, flags Flags, data avpData) Avps {
+	return append(avps, newAvp(code, flags, vendorId, data))
 }
 
 type ApplicationId uint32
@@ -98,9 +89,7 @@ type Message struct {
 func NewMessage(version byte, flags Flags, commandCode CommandCode, applicationId ApplicationId, hopByHopId [4]byte, endToEndId [4]byte, avps Avps) Message {
 	length := uint32(20)
 	for _, avp := range avps {
-		for _, avp := range avp {
-			length += avp.length + avp.padding
-		}
+		length += avp.length + avp.padding
 	}
 	return Message{
 		Version:       version,
@@ -127,15 +116,19 @@ func (message Message) ToBytes() []byte {
 	copy(buffer, message.EndToEndId[:])
 	bytes = append(bytes, buffer...)
 	for _, avp := range message.Avps {
-		for _, avp := range avp {
-			bytes = append(bytes, avp.toBytes()...)
-		}
+		bytes = append(bytes, avp.toBytes()...)
 	}
 	return bytes
 }
 
-func (avps Avps) Get(code Code, vendorId VendorId) []avp {
-	return avps[avpId{code, vendorId}]
+func (avps Avps) Get(code Code, vendorId VendorId) Avps {
+	filteredAvps := make([]avp, 0)
+	for _, avp := range avps {
+		if avp.Code == code && avp.VendorId == vendorId {
+			filteredAvps = append(filteredAvps, avp)
+		}
+	}
+	return filteredAvps
 }
 
 func (avp avp) ToString() *string {
@@ -200,25 +193,22 @@ func (avp avp) ToTime() *time.Time {
 
 func ReadAvps(bytes []byte) Avps {
 	offset := 0
-	avps := make(Avps)
+	avps := make(Avps, 0)
 	for offset < len(bytes) {
 		code := Code(binary.BigEndian.Uint32(bytes[offset : offset+4]))
 		flags := Flags(bytes[offset+4])
 		vendorSpecific := flags&0x80 != 0
 		length := int(readUInt24(bytes[offset+5 : offset+8]))
-		avpId := avpId{code, 0}
+		var vendorId VendorId
 		var avpData avpData
 		if vendorSpecific {
-			avpId.vendorId = VendorId(binary.BigEndian.Uint32(bytes[offset+8 : offset+12]))
+			vendorId = VendorId(binary.BigEndian.Uint32(bytes[offset+8 : offset+12]))
 			avpData = bytes[offset+12 : offset+length]
 		} else {
 			avpData = bytes[offset+8 : offset+length]
 		}
-		if avps[avpId] == nil {
-			avps[avpId] = make([]avp, 0)
-		}
-		avp := newAvp(code, flags, avpId.vendorId, avpData)
-		avps[avpId] = append(avps[avpId], avp)
+		avp := newAvp(code, flags, vendorId, avpData)
+		avps = append(avps, avp)
 		offset += length + int(avp.padding)
 	}
 	return avps

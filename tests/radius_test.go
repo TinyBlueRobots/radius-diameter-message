@@ -10,9 +10,9 @@ import (
 )
 
 func Test_radius_message(t *testing.T) {
-	avps := make(radius.Avps)
-	avps.Add(1, 0, []byte("901280064290558"))
-	avps.Add(1, 10415, []byte("901280064290558"))
+	avps := make(radius.Avps, 0)
+	avps = avps.Add(1, 0, []byte("901280064290558"))
+	avps = avps.Add(1, 10415, []byte("901280064290558"))
 	authenticator := [16]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	message := radius.NewMessage(1, 1, authenticator, avps)
 	bytes := message.ToBytes()
