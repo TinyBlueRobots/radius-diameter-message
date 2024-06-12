@@ -40,7 +40,7 @@ func newAvp(code Code, flags Flags, vendorId VendorId, avpData avpData) avp {
 	}
 }
 
-func (avp avp) toBytes() []byte {
+func (avp avp) ToBytes() []byte {
 	bytes := make([]byte, avp.length+avp.padding)
 	binary.BigEndian.PutUint32(bytes, uint32(avp.Code))
 	bytes[4] = byte(avp.Flags)
@@ -50,6 +50,14 @@ func (avp avp) toBytes() []byte {
 }
 
 type Avps []avp
+
+func (avps Avps) ToBytes() []byte {
+	bytes := make([]byte, 0)
+	for _, avp := range avps {
+		bytes = append(bytes, avp.ToBytes()...)
+	}
+	return bytes
+}
 
 func (avps Avps) Add(code Code, vendorId VendorId, flags Flags, data avpData) Avps {
 	return append(avps, newAvp(code, flags, vendorId, data))
@@ -115,9 +123,7 @@ func (message Message) ToBytes() []byte {
 	bytes = append(bytes, buffer...)
 	copy(buffer, message.EndToEndId[:])
 	bytes = append(bytes, buffer...)
-	for _, avp := range message.Avps {
-		bytes = append(bytes, avp.toBytes()...)
-	}
+	bytes = append(bytes, message.Avps.ToBytes()...)
 	return bytes
 }
 

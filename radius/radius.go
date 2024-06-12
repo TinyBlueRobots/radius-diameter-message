@@ -32,7 +32,7 @@ func newAvp(attributeType AttributeType, vendorId VendorId, avpData avpData) avp
 	return a
 }
 
-func (avp avp) toBytes() []byte {
+func (avp avp) ToBytes() []byte {
 	bytes := make([]byte, 0)
 	if avp.VendorId == 0 {
 		bytes = append(bytes, byte(avp.Type))
@@ -54,6 +54,14 @@ type Avps []avp
 
 func (avps Avps) Add(attributeType AttributeType, vendorId VendorId, data avpData) Avps {
 	return append(avps, newAvp(attributeType, vendorId, data))
+}
+
+func (avps Avps) ToBytes() []byte {
+	bytes := make([]byte, 0)
+	for _, avp := range avps {
+		bytes = append(bytes, avp.ToBytes()...)
+	}
+	return bytes
 }
 
 type Code uint32
@@ -88,9 +96,7 @@ func (message Message) ToBytes() []byte {
 	binary.BigEndian.PutUint16(buffer, message.Length)
 	bytes = append(bytes, buffer...)
 	bytes = append(bytes, message.Authenticator[:]...)
-	for _, avp := range message.Avps {
-		bytes = append(bytes, avp.toBytes()...)
-	}
+	bytes = append(bytes, message.Avps.ToBytes()...)
 	return bytes
 }
 
