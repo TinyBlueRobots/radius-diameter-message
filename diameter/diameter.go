@@ -118,11 +118,8 @@ func (message Message) ToBytes() []byte {
 	bytes = append(bytes, byte(message.Flags))
 	bytes = append(bytes, message.CommandCode.toBytes()...)
 	bytes = append(bytes, message.ApplicationId.toBytes()...)
-	buffer := make([]byte, 4)
-	copy(buffer, message.HopByHopId[:])
-	bytes = append(bytes, buffer...)
-	copy(buffer, message.EndToEndId[:])
-	bytes = append(bytes, buffer...)
+	bytes = append(bytes, message.HopByHopId[:]...)
+	bytes = append(bytes, message.EndToEndId[:]...)
 	bytes = append(bytes, message.Avps.ToBytes()...)
 	return bytes
 }
