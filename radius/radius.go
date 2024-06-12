@@ -144,7 +144,7 @@ func (avp avp) ToTime() *time.Time {
 	return &value
 }
 
-func ReadAvps(bytes []byte) Avps {
+func readAvps(bytes []byte) Avps {
 	offset := 0
 	avps := make(Avps)
 	for offset < len(bytes) {
@@ -182,7 +182,7 @@ func ReadMessage(bytes []byte) *Message {
 		Identifier:    bytes[1],
 		Length:        binary.BigEndian.Uint16(bytes[2:4]),
 		Authenticator: authenticator,
-		Avps:          ReadAvps(bytes[20:]),
+		Avps:          readAvps(bytes[20:]),
 	}
 	return &message
 }

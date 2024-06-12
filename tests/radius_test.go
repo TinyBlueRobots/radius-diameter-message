@@ -31,10 +31,12 @@ func Test_radius_message(t *testing.T) {
 func Test_radius_timestamp(t *testing.T) {
 	base64Data := "NwZkpTYl"
 	decodedData, err := base64.StdEncoding.DecodeString(base64Data)
+	decodedData = append(make([]byte, 20), decodedData...)
 	if err != nil {
 		t.Fatal(err)
 	}
-	avp := radius.ReadAvps(decodedData).Get(55, 0)[0]
+	message := radius.ReadMessage(decodedData)
+	avp := message.Avps.Get(55, 0)[0]
 	expected := time.Time(time.Date(2023, time.July, 5, 10, 21, 41, 0, time.Local))
 	assert.Equal(t, expected, *avp.ToTime())
 }
