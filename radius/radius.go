@@ -10,15 +10,15 @@ type AttributeType byte
 type VendorId uint32
 type avpData []byte
 
-type avp struct {
+type Avp struct {
 	Type     AttributeType
 	length   byte
 	VendorId VendorId
 	Data     avpData
 }
 
-func NewAvp(attributeType AttributeType, vendorId VendorId, avpData avpData) avp {
-	a := avp{
+func NewAvp(attributeType AttributeType, vendorId VendorId, avpData avpData) Avp {
+	a := Avp{
 		Type: attributeType,
 		Data: avpData,
 	}
@@ -32,7 +32,7 @@ func NewAvp(attributeType AttributeType, vendorId VendorId, avpData avpData) avp
 	return a
 }
 
-func (avp avp) ToBytes() []byte {
+func (avp Avp) ToBytes() []byte {
 	bytes := make([]byte, 0)
 	if avp.VendorId == 0 {
 		bytes = append(bytes, byte(avp.Type))
@@ -50,7 +50,7 @@ func (avp avp) ToBytes() []byte {
 	return bytes
 }
 
-type Avps []avp
+type Avps []Avp
 
 func (avps Avps) Add(attributeType AttributeType, vendorId VendorId, data avpData) Avps {
 	return append(avps, NewAvp(attributeType, vendorId, data))
@@ -100,8 +100,8 @@ func (message Message) ToBytes() []byte {
 	return bytes
 }
 
-func (avps Avps) Get(attributeType AttributeType, vendorId VendorId) []avp {
-	filteredAvps := make([]avp, 0)
+func (avps Avps) Get(attributeType AttributeType, vendorId VendorId) []Avp {
+	filteredAvps := make([]Avp, 0)
 	for _, avp := range avps {
 		if avp.Type == attributeType && avp.VendorId == vendorId {
 			filteredAvps = append(filteredAvps, avp)
@@ -110,7 +110,7 @@ func (avps Avps) Get(attributeType AttributeType, vendorId VendorId) []avp {
 	return filteredAvps
 }
 
-func (avp avp) ToString() *string {
+func (avp Avp) ToString() *string {
 	if avp.Data == nil {
 		return nil
 	}
@@ -118,7 +118,7 @@ func (avp avp) ToString() *string {
 	return &value
 }
 
-func (avp avp) ToUint32() *uint32 {
+func (avp Avp) ToUint32() *uint32 {
 	if avp.Data == nil {
 		return nil
 	}
@@ -126,7 +126,7 @@ func (avp avp) ToUint32() *uint32 {
 	return &value
 }
 
-func (avp avp) ToNetIP() *net.IP {
+func (avp Avp) ToNetIP() *net.IP {
 	if avp.Data == nil {
 		return nil
 	}
@@ -134,7 +134,7 @@ func (avp avp) ToNetIP() *net.IP {
 	return &value
 }
 
-func (avp avp) ToTime() *time.Time {
+func (avp Avp) ToTime() *time.Time {
 	if avp.Data == nil {
 		return nil
 	}
