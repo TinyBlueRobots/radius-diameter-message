@@ -17,7 +17,7 @@ type avp struct {
 	Data     avpData
 }
 
-func newAvp(attributeType AttributeType, vendorId VendorId, avpData avpData) avp {
+func NewAvp(attributeType AttributeType, vendorId VendorId, avpData avpData) avp {
 	a := avp{
 		Type: attributeType,
 		Data: avpData,
@@ -53,7 +53,7 @@ func (avp avp) ToBytes() []byte {
 type Avps []avp
 
 func (avps Avps) Add(attributeType AttributeType, vendorId VendorId, data avpData) Avps {
-	return append(avps, newAvp(attributeType, vendorId, data))
+	return append(avps, NewAvp(attributeType, vendorId, data))
 }
 
 func (avps Avps) ToBytes() []byte {
@@ -160,7 +160,7 @@ func readAvps(bytes []byte) Avps {
 			avpLength := bytes[offset+1]
 			avpData = bytes[offset+2 : offset+int(avpLength)]
 		}
-		avps = append(avps, newAvp(attributeType, vendorId, avpData))
+		avps = append(avps, NewAvp(attributeType, vendorId, avpData))
 		offset += int(length)
 	}
 	return avps

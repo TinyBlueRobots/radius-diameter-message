@@ -21,7 +21,7 @@ type avp struct {
 	padding  uint32
 }
 
-func newAvp(code Code, flags Flags, vendorId VendorId, avpData avpData) avp {
+func NewAvp(code Code, flags Flags, vendorId VendorId, avpData avpData) avp {
 	padding := uint32(len(avpData) % 4)
 	if padding != 0 {
 		padding = 4 - padding
@@ -60,7 +60,7 @@ func (avps Avps) ToBytes() []byte {
 }
 
 func (avps Avps) Add(code Code, vendorId VendorId, flags Flags, data avpData) Avps {
-	return append(avps, newAvp(code, flags, vendorId, data))
+	return append(avps, NewAvp(code, flags, vendorId, data))
 }
 
 type ApplicationId uint32
@@ -213,7 +213,7 @@ func ReadAvps(bytes []byte) Avps {
 		} else {
 			avpData = bytes[offset+8 : offset+length]
 		}
-		avp := newAvp(code, flags, vendorId, avpData)
+		avp := NewAvp(code, flags, vendorId, avpData)
 		avps = append(avps, avp)
 		offset += length + int(avp.padding)
 	}
