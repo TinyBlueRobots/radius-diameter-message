@@ -2,7 +2,6 @@ package tests
 
 import (
 	"encoding/base64"
-	"encoding/binary"
 	"net"
 	"testing"
 	"time"
@@ -16,17 +15,11 @@ const (
 	requestFlags   diameter.Flags = 0x80
 )
 
-func writeUint32(value uint32) []byte {
-	bytes := make([]byte, 4)
-	binary.BigEndian.PutUint32(bytes, value)
-	return bytes
-}
-
 func Test_diameter_message(t *testing.T) {
 	avps := make(diameter.Avps, 0)
-	avps = avps.Add(258, 0, mandatoryFlags, writeUint32(1))
+	avps = avps.AddUint32(258, 0, mandatoryFlags, 1)
 	ipAddress := net.IPv4(100, 98, 179, 174).To4()
-	avps = avps.Add(8, 0, mandatoryFlags, []byte(ipAddress))
+	avps = avps.AddNetIP(8, 0, mandatoryFlags, ipAddress)
 	message := diameter.NewMessage(1, requestFlags, 265, 1, [4]byte{0, 0, 0, 0}, [4]byte{0, 0, 0, 0}, avps)
 	bytes := message.ToBytes()
 	version := bytes[0]
