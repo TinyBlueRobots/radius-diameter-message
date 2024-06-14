@@ -105,9 +105,16 @@ type Code uint32
 type Message struct {
 	Code          Code
 	Identifier    byte
-	Length        uint16
 	Authenticator [16]byte
 	Avps          Avps
+}
+
+func (message Message) length() uint16 {
+	length := uint16(20)
+	for _, avp := range message.Avps {
+		length += uint16(avp.length)
+	}
+	return length
 }
 
 func NewMessage(code Code, identifier byte, authenticator [16]byte, avps Avps) Message {
@@ -118,7 +125,6 @@ func NewMessage(code Code, identifier byte, authenticator [16]byte, avps Avps) M
 	return Message{
 		Code:          code,
 		Identifier:    identifier,
-		Length:        length,
 		Authenticator: authenticator,
 		Avps:          avps,
 	}
@@ -129,7 +135,7 @@ func (message Message) ToBytes() []byte {
 	bytes = append(bytes, byte(message.Code))
 	bytes = append(bytes, message.Identifier)
 	buffer := make([]byte, 2)
-	binary.BigEndian.PutUint16(buffer, message.Length)
+	binary.BigEndian.PutUint16(buffer, message.length())
 	bytes = append(bytes, buffer...)
 	bytes = append(bytes, message.Authenticator[:]...)
 	bytes = append(bytes, message.Avps.ToBytes()...)
@@ -211,7 +217,6 @@ func ReadMessage(bytes []byte) *Message {
 	message := Message{
 		Code:          Code(bytes[0]),
 		Identifier:    bytes[1],
-		Length:        binary.BigEndian.Uint16(bytes[2:4]),
 		Authenticator: authenticator,
 		Avps:          readAvps(bytes[20:]),
 	}

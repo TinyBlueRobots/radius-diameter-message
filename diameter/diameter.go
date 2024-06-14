@@ -161,7 +161,6 @@ func (commandCode CommandCode) toBytes() []byte {
 
 type Message struct {
 	Version       byte
-	length        uint32
 	Flags         Flags
 	CommandCode   CommandCode
 	ApplicationId ApplicationId
@@ -170,14 +169,17 @@ type Message struct {
 	Avps          Avps
 }
 
-func NewMessage(version byte, flags Flags, commandCode CommandCode, applicationId ApplicationId, hopByHopId [4]byte, endToEndId [4]byte, avps Avps) Message {
+func (message Message) length() uint32 {
 	length := uint32(20)
-	for _, avp := range avps {
+	for _, avp := range message.Avps {
 		length += avp.length + avp.padding
 	}
+	return length
+}
+
+func NewMessage(version byte, flags Flags, commandCode CommandCode, applicationId ApplicationId, hopByHopId [4]byte, endToEndId [4]byte, avps Avps) Message {
 	return Message{
 		Version:       version,
-		length:        length,
 		Flags:         flags,
 		CommandCode:   commandCode,
 		ApplicationId: applicationId,
@@ -190,7 +192,7 @@ func NewMessage(version byte, flags Flags, commandCode CommandCode, applicationI
 func (message Message) ToBytes() []byte {
 	bytes := make([]byte, 0)
 	bytes = append(bytes, message.Version)
-	bytes = append(bytes, writeUInt24(message.length)...)
+	bytes = append(bytes, writeUInt24(message.length())...)
 	bytes = append(bytes, byte(message.Flags))
 	bytes = append(bytes, message.CommandCode.toBytes()...)
 	bytes = append(bytes, message.ApplicationId.toBytes()...)
@@ -314,7 +316,6 @@ func ReadMessage(bytes []byte) *Message {
 	copy(endToEndId[:], bytes[16:20])
 	message := Message{
 		Version:       bytes[0],
-		length:        readUInt24(bytes[1:4]),
 		Flags:         Flags(bytes[4]),
 		CommandCode:   CommandCode(readUInt24(bytes[5:8])),
 		ApplicationId: ApplicationId(binary.BigEndian.Uint32(bytes[8:12])),
