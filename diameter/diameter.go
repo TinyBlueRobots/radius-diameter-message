@@ -212,6 +212,15 @@ func (avps Avps) Get(code Code, vendorId VendorId) Avps {
 	return filteredAvps
 }
 
+func (avps Avps) GetFirst(code Code, vendorId VendorId) *Avp {
+	for _, avp := range avps {
+		if avp.Code == code && avp.VendorId == vendorId {
+			return &avp
+		}
+	}
+	return nil
+}
+
 func (avp Avp) ToString() *string {
 	if avp.Data == nil {
 		return nil

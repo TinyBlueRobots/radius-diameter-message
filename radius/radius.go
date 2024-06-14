@@ -152,6 +152,15 @@ func (avps Avps) Get(attributeType AttributeType, vendorId VendorId) []Avp {
 	return filteredAvps
 }
 
+func (avps Avps) GetFirst(attributeType AttributeType, vendorId VendorId) *Avp {
+	for _, avp := range avps {
+		if avp.Type == attributeType && avp.VendorId == vendorId {
+			return &avp
+		}
+	}
+	return nil
+}
+
 func (avp Avp) ToString() *string {
 	if avp.Data == nil {
 		return nil

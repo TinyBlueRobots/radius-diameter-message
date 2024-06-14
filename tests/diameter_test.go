@@ -43,9 +43,9 @@ func Test_diameter_message(t *testing.T) {
 	assert.Equal(t, expectedAvp, actualAvps[12:])
 
 	message = *diameter.ReadMessage(bytes)
-	avp := message.Avps.Get(258, 0)[0]
+	avp := message.Avps.GetFirst(258, 0)
 	assert.Equal(t, uint32(1), *avp.ToUint32())
-	avp = message.Avps.Get(8, 0)[0]
+	avp = message.Avps.GetFirst(8, 0)
 	assert.Equal(t, ipAddress, *avp.ToNetIP())
 }
 
@@ -97,7 +97,7 @@ func Test_diameter_timestamp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	avp := diameter.ReadAvps(decodedData).Get(55, 0)[0]
+	avp := diameter.ReadAvps(decodedData).GetFirst(55, 0)
 	expected := time.Time(time.Date(2024, time.May, 15, 17, 50, 37, 0, time.Local))
 	assert.Equal(t, expected, *avp.ToTime())
 }
