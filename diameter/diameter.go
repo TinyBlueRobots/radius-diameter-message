@@ -40,6 +40,10 @@ func NewAvp(code Code, flags Flags, vendorId VendorId, avpData avpData) Avp {
 	}
 }
 
+func NewAvpGroup(code Code, flags Flags, vendorId VendorId, avps Avps) Avp {
+	return NewAvp(code, flags, vendorId, avps.ToBytes())
+}
+
 func NewAvpString(code Code, flags Flags, vendorId VendorId, value string) Avp {
 	return NewAvp(code, flags, vendorId, []byte(value))
 }
@@ -129,6 +133,10 @@ func (avps Avps) AddNetIP(code Code, vendorId VendorId, flags Flags, value net.I
 
 func (avps Avps) AddTime(code Code, vendorId VendorId, flags Flags, value time.Time) Avps {
 	return append(avps, NewAvpTime(code, flags, vendorId, value))
+}
+
+func (avps Avps) AddGroup(code Code, vendorId VendorId, flags Flags, groupAvps Avps) Avps {
+	return append(avps, NewAvpGroup(code, flags, vendorId, groupAvps))
 }
 
 type ApplicationId uint32
@@ -260,6 +268,10 @@ func (avp Avp) ToTime() *time.Time {
 	timestamp := int64(binary.BigEndian.Uint32(avp.Data))
 	value := time.Unix(timestamp-2208988800, 0)
 	return &value
+}
+
+func (avp Avp) ToGroup() Avps {
+	return ReadAvps(avp.Data)
 }
 
 func ReadAvps(bytes []byte) Avps {
