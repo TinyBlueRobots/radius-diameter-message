@@ -10,7 +10,7 @@ import (
 )
 
 func Test_radius_message(t *testing.T) {
-	avps := make(radius.Avps, 0)
+	avps := radius.NewAvps()
 	avps = avps.AddString(1, 0, "901280064290558")
 	avps = avps.AddString(1, 10415, "901280064290558")
 	authenticator := [16]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}

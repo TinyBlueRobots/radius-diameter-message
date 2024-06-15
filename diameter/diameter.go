@@ -95,6 +95,10 @@ func (avp Avp) ToBytes() []byte {
 
 type Avps []Avp
 
+func NewAvps() Avps {
+	return make([]Avp, 0)
+}
+
 func (avps Avps) ToBytes() []byte {
 	bytes := make([]byte, 0)
 	for _, avp := range avps {

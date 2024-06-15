@@ -72,6 +72,10 @@ func (avp Avp) ToBytes() []byte {
 
 type Avps []Avp
 
+func NewAvps() Avps {
+	return make(Avps, 0)
+}
+
 func (avps Avps) Add(attributeType AttributeType, vendorId VendorId, data avpData) Avps {
 	return append(avps, NewAvp(attributeType, vendorId, data))
 }

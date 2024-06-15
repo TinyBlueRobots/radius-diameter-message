@@ -16,7 +16,7 @@ const (
 )
 
 func Test_diameter_message(t *testing.T) {
-	avps := make(diameter.Avps, 0)
+	avps := diameter.NewAvps()
 	avps = avps.AddUint32(258, 0, mandatoryFlags, 1)
 	ipAddress := net.IPv4(100, 98, 179, 174).To4()
 	avps = avps.AddNetIP(8, 0, mandatoryFlags, ipAddress)
@@ -71,8 +71,8 @@ func Test_diameter_read_grouped_avp(t *testing.T) {
 }
 
 func Test_diameter_write_grouped_avp(t *testing.T) {
-	avps := make(diameter.Avps, 0)
-	group := make(diameter.Avps, 0)
+	avps := diameter.NewAvps()
+	group := diameter.NewAvps()
 	group = group.AddUint32(432, 0, 0, 1)
 	avps = avps.AddGroup(456, 0, 0, group)
 	message := diameter.NewMessage(1, 0, 265, 1, [4]byte{0, 0, 0, 0}, [4]byte{0, 0, 0, 0}, avps)
