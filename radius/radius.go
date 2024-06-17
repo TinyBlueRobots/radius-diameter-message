@@ -147,7 +147,7 @@ func (message Message) ToBytes() []byte {
 }
 
 func (avps Avps) Get(attributeType AttributeType, vendorId VendorId) []Avp {
-	filteredAvps := make([]Avp, 0)
+	filteredAvps := NewAvps()
 	for _, avp := range avps {
 		if avp.Type == attributeType && avp.VendorId == vendorId {
 			filteredAvps = append(filteredAvps, avp)
@@ -200,7 +200,7 @@ func (avp Avp) ToTime() *time.Time {
 
 func readAvps(bytes []byte) Avps {
 	offset := 0
-	avps := make(Avps, 0)
+	avps := NewAvps()
 	for offset < len(bytes) {
 		attributeType := AttributeType(bytes[offset])
 		length := bytes[offset+1]

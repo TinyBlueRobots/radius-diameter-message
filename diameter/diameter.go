@@ -207,7 +207,7 @@ func (message Message) ToBytes() []byte {
 }
 
 func (avps Avps) Get(code Code, vendorId VendorId) Avps {
-	filteredAvps := make([]Avp, 0)
+	filteredAvps := NewAvps()
 	for _, avp := range avps {
 		if avp.Code == code && avp.VendorId == vendorId {
 			filteredAvps = append(filteredAvps, avp)
@@ -291,7 +291,7 @@ func (avp Avp) ToGroup() Avps {
 
 func ReadAvps(bytes []byte) Avps {
 	offset := 0
-	avps := make(Avps, 0)
+	avps := NewAvps()
 	for offset < len(bytes) {
 		code := Code(binary.BigEndian.Uint32(bytes[offset : offset+4]))
 		flags := Flags(bytes[offset+4])
