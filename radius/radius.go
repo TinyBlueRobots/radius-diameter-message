@@ -80,6 +80,10 @@ func (avps Avps) Add(attributeType AttributeType, vendorId VendorId, data avpDat
 	return append(avps, NewAvp(attributeType, vendorId, data))
 }
 
+func (avps Avps) AddAvp(avp Avp) Avps {
+	return append(avps, avp)
+}
+
 func (avps Avps) AddString(attributeType AttributeType, vendorId VendorId, value string) Avps {
 	return append(avps, NewAvpString(attributeType, vendorId, value))
 }

@@ -121,6 +121,10 @@ func (avps Avps) Add(code Code, vendorId VendorId, flags Flags, data avpData) Av
 	return append(avps, NewAvp(code, flags, vendorId, data))
 }
 
+func (avps Avps) AddAvp(avp Avp) Avps {
+	return append(avps, avp)
+}
+
 func (avps Avps) AddString(code Code, vendorId VendorId, flags Flags, value string) Avps {
 	return append(avps, NewAvpString(code, flags, vendorId, value))
 }
