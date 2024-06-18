@@ -18,8 +18,8 @@ const (
 func Test_diameter_message(t *testing.T) {
 	avps := diameter.NewAvps()
 	avps = avps.AddUint32(258, 0, mandatoryFlags, 1)
-	ipAddress := net.IPv4(100, 98, 179, 174).To4()
-	avps = avps.AddNetIP(8, 0, mandatoryFlags, ipAddress)
+	ipAddress := net.IPv4(100, 98, 179, 174)
+	avps = avps.AddNetIP(257, 0, mandatoryFlags, ipAddress)
 	message := diameter.NewMessage(1, requestFlags, 265, 1, [4]byte{0, 0, 0, 0}, [4]byte{0, 0, 0, 0}, avps)
 	bytes := message.ToBytes()
 	version := bytes[0]
@@ -31,7 +31,7 @@ func Test_diameter_message(t *testing.T) {
 	endToEndId := bytes[16:20]
 	actualAvps := bytes[20:]
 	assert.Equal(t, byte(1), version)
-	assert.Equal(t, []byte{0x0, 0x0, 0x2c}, length)
+	assert.Equal(t, []byte{0x0, 0x0, 0x30}, length)
 	assert.Equal(t, byte(0x80), flags)
 	assert.Equal(t, []byte{0x0, 0x1, 0x9}, commandCode)
 	assert.Equal(t, []byte{0x0, 0x0, 0x0, 0x1}, applicationId)
@@ -39,14 +39,14 @@ func Test_diameter_message(t *testing.T) {
 	assert.Equal(t, []byte{0x0, 0x0, 0x0, 0x0}, endToEndId)
 	expectedAvp := []byte{0x0, 0x0, 0x1, 0x02, byte(mandatoryFlags), 0x0, 0x0, 0xc, 0x0, 0x0, 0x0, 0x1}
 	assert.Equal(t, expectedAvp, actualAvps[:12])
-	expectedAvp = []byte{0x0, 0x0, 0x0, 0x08, byte(mandatoryFlags), 0x0, 0x0, 0xc, 0x64, 0x62, 0xb3, 0xae}
+	expectedAvp = []byte{0x0, 0x0, 0x1, 0x1, byte(mandatoryFlags), 0x0, 0x0, 0xe, 0x0, 0x1, 0x64, 0x62, 0xb3, 0xae, 0x0, 0x0}
 	assert.Equal(t, expectedAvp, actualAvps[12:])
 
 	message = *diameter.ReadMessage(bytes)
 	avp := message.Avps.GetFirst(258, 0)
 	assert.Equal(t, uint32(1), *avp.ToUint32())
-	avp = message.Avps.GetFirst(8, 0)
-	assert.Equal(t, ipAddress, *avp.ToNetIP())
+	avp = message.Avps.GetFirst(257, 0)
+	assert.Equal(t, ipAddress.To4(), *avp.ToNetIP())
 }
 
 func Test_diameter_read_grouped_avp(t *testing.T) {

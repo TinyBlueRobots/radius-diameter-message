@@ -75,7 +75,17 @@ func NewAvpFloat64(code Code, flags Flags, vendorId VendorId, value float64) Avp
 }
 
 func NewAvpNetIP(code Code, flags Flags, vendorId VendorId, value net.IP) Avp {
-	return NewAvp(code, flags, vendorId, avpData(value.To4()))
+	if value.To4() != nil {
+		avpData := make([]byte, 6)
+		avpData[1] = 1
+		copy(avpData[2:], value.To4())
+		return NewAvp(code, flags, vendorId, avpData)
+	} else {
+		avpData := make([]byte, 18)
+		avpData[1] = 2
+		copy(avpData[2:], value.To16())
+		return NewAvp(code, flags, vendorId, avpData)
+	}
 }
 
 func NewAvpTime(code Code, flags Flags, vendorId VendorId, value time.Time) Avp {
@@ -272,8 +282,13 @@ func (avp Avp) ToNetIP() *net.IP {
 	if avp.Data == nil {
 		return nil
 	}
-	value := net.IP(avp.Data)
-	return &value
+	if avp.Data[1] == 1 {
+		value := net.IP(avp.Data[2:6])
+		return &value
+	} else {
+		value := net.IP(avp.Data[2:18])
+		return &value
+	}
 }
 
 func (avp Avp) ToTime() *time.Time {
