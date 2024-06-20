@@ -24,8 +24,8 @@ func Test_radius_message(t *testing.T) {
 	assert.Equal(t, []byte{0x1a, 0x17, 0x0, 0x0, 0x28, 0xaf, 0x1, 0x11, 0x39, 0x30, 0x31, 0x32, 0x38, 0x30, 0x30, 0x36, 0x34, 0x32, 0x39, 0x30, 0x35, 0x35, 0x38}, bytes[37:])
 
 	message = *radius.ReadMessage(bytes)
-	avp := message.Avps.GetFirst(1, 0)
-	assert.Equal(t, "901280064290558", *avp.ToString())
+	avp := message.Avps.GetFirst(1, 0).ToString()
+	assert.Equal(t, "901280064290558", *avp)
 }
 
 func Test_radius_timestamp(t *testing.T) {
@@ -36,9 +36,9 @@ func Test_radius_timestamp(t *testing.T) {
 		t.Fatal(err)
 	}
 	message := radius.ReadMessage(decodedData)
-	avp := message.Avps.GetFirst(55, 0)
+	avp := message.Avps.GetFirst(55, 0).ToTime()
 	expected := time.Time(time.Date(2023, time.July, 5, 10, 21, 41, 0, time.Local))
-	assert.Equal(t, expected, *avp.ToTime())
+	assert.Equal(t, expected, *avp)
 }
 
 func Test_read_message_bytes(t *testing.T) {
@@ -48,11 +48,17 @@ func Test_read_message_bytes(t *testing.T) {
 		t.Fatal(err)
 	}
 	message := radius.ReadMessage(decodedData)
-	avp := message.Avps.GetFirst(1, 10415)
-	assert.Equal(t, "901280064290558", *avp.ToString())
+	avp := message.Avps.GetFirst(1, 10415).ToString()
+	assert.Equal(t, "901280064290558", *avp)
 }
 
 func Test_radius_bytes(t *testing.T) {
 	avp := radius.NewAvp(1, 0, []byte{0x0, 0x0, 0x0, 0x1})
 	assert.Equal(t, []byte{0x1, 0x6, 0x0, 0x0, 0x0, 0x1}, avp.ToBytes())
+}
+
+func Test_radius_nil(t *testing.T) {
+	var avps radius.Avps
+	avp := avps.GetFirst(1, 0).ToString()
+	assert.Nil(t, avp)
 }

@@ -59,6 +59,12 @@ func Test_diameter_read_grouped_avp(t *testing.T) {
 	assert.Equal(t, "dataconnect", *apn)
 }
 
+func Test_diameter_nil(t *testing.T) {
+	var avps diameter.Avps
+	value := avps.GetFirst(1, 0).ToGroup().GetFirst(1, 0).ToString()
+	assert.Nil(t, value)
+}
+
 func Test_diameter_write_grouped_avp(t *testing.T) {
 	avps := diameter.NewAvps()
 	group := diameter.NewAvps()

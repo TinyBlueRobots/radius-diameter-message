@@ -221,9 +221,6 @@ func (message Message) ToBytes() []byte {
 }
 
 func (avps Avps) Get(code Code, vendorId VendorId) Avps {
-	if avps == nil {
-		return nil
-	}
 	filteredAvps := NewAvps()
 	for _, avp := range avps {
 		if avp.Code == code && avp.VendorId == vendorId {
@@ -234,9 +231,6 @@ func (avps Avps) Get(code Code, vendorId VendorId) Avps {
 }
 
 func (avps Avps) GetFirst(code Code, vendorId VendorId) *Avp {
-	if avps == nil {
-		return nil
-	}
 	for _, avp := range avps {
 		if avp.Code == code && avp.VendorId == vendorId {
 			return &avp
@@ -245,8 +239,8 @@ func (avps Avps) GetFirst(code Code, vendorId VendorId) *Avp {
 	return nil
 }
 
-func (avp Avp) ToString() *string {
-	if avp.Data == nil {
+func (avp *Avp) ToString() *string {
+	if avp == nil || avp.Data == nil {
 		return nil
 	}
 
@@ -254,24 +248,24 @@ func (avp Avp) ToString() *string {
 	return &value
 }
 
-func (avp Avp) ToUint32() *uint32 {
-	if avp.Data == nil {
+func (avp *Avp) ToUint32() *uint32 {
+	if avp == nil || avp.Data == nil {
 		return nil
 	}
 	value := binary.BigEndian.Uint32(avp.Data)
 	return &value
 }
 
-func (avp Avp) ToUint64() *uint64 {
-	if avp.Data == nil {
+func (avp *Avp) ToUint64() *uint64 {
+	if avp == nil || avp.Data == nil {
 		return nil
 	}
 	value := binary.BigEndian.Uint64(avp.Data)
 	return &value
 }
 
-func (avp Avp) ToFloat32() *float32 {
-	if avp.Data == nil {
+func (avp *Avp) ToFloat32() *float32 {
+	if avp == nil || avp.Data == nil {
 		return nil
 	}
 	bits := binary.BigEndian.Uint32(avp.Data)
@@ -279,8 +273,8 @@ func (avp Avp) ToFloat32() *float32 {
 	return &value
 }
 
-func (avp Avp) ToFloat64() *float64 {
-	if avp.Data == nil {
+func (avp *Avp) ToFloat64() *float64 {
+	if avp == nil || avp.Data == nil {
 		return nil
 	}
 	bits := binary.BigEndian.Uint64(avp.Data)
@@ -288,8 +282,8 @@ func (avp Avp) ToFloat64() *float64 {
 	return &value
 }
 
-func (avp Avp) ToNetIP() *net.IP {
-	if avp.Data == nil {
+func (avp *Avp) ToNetIP() *net.IP {
+	if avp == nil || avp.Data == nil {
 		return nil
 	}
 	if avp.Data[1] == 1 {
@@ -301,8 +295,8 @@ func (avp Avp) ToNetIP() *net.IP {
 	}
 }
 
-func (avp Avp) ToTime() *time.Time {
-	if avp.Data == nil {
+func (avp *Avp) ToTime() *time.Time {
+	if avp == nil || avp.Data == nil {
 		return nil
 	}
 	timestamp := int64(binary.BigEndian.Uint32(avp.Data))
@@ -310,14 +304,14 @@ func (avp Avp) ToTime() *time.Time {
 	return &value
 }
 
-func (avp Avp) ToGroup() Avps {
+func (avp *Avp) ToGroup() Avps {
+	if avp == nil || avp.Data == nil {
+		return NewAvps()
+	}
 	return ReadAvps(avp.Data)
 }
 
 func ReadAvps(bytes []byte) Avps {
-	if bytes == nil {
-		return nil
-	}
 	offset := 0
 	avps := NewAvps()
 	for offset < len(bytes) {

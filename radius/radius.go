@@ -164,9 +164,6 @@ func (avps Avps) Get(attributeType AttributeType, vendorId VendorId) []Avp {
 }
 
 func (avps Avps) GetFirst(attributeType AttributeType, vendorId VendorId) *Avp {
-	if avps == nil {
-		return nil
-	}
 	for _, avp := range avps {
 		if avp.Type == attributeType && avp.VendorId == vendorId {
 			return &avp
@@ -175,32 +172,32 @@ func (avps Avps) GetFirst(attributeType AttributeType, vendorId VendorId) *Avp {
 	return nil
 }
 
-func (avp Avp) ToString() *string {
-	if avp.Data == nil {
+func (avp *Avp) ToString() *string {
+	if avp == nil || avp.Data == nil {
 		return nil
 	}
 	value := string(avp.Data)
 	return &value
 }
 
-func (avp Avp) ToUint32() *uint32 {
-	if avp.Data == nil {
+func (avp *Avp) ToUint32() *uint32 {
+	if avp == nil || avp.Data == nil {
 		return nil
 	}
 	value := binary.BigEndian.Uint32(avp.Data)
 	return &value
 }
 
-func (avp Avp) ToNetIP() *net.IP {
-	if avp.Data == nil {
+func (avp *Avp) ToNetIP() *net.IP {
+	if avp == nil || avp.Data == nil {
 		return nil
 	}
 	value := net.IP(avp.Data)
 	return &value
 }
 
-func (avp Avp) ToTime() *time.Time {
-	if avp.Data == nil {
+func (avp *Avp) ToTime() *time.Time {
+	if avp == nil || avp.Data == nil {
 		return nil
 	}
 	timestamp := int64(binary.BigEndian.Uint32(avp.Data))
