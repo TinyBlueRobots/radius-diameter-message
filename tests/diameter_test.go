@@ -55,19 +55,8 @@ func Test_diameter_read_grouped_avp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, avp := range diameter.ReadAvps(decodedData) {
-		if avp.Code == 873 {
-			for _, avp := range avp.ToGroup() {
-				for _, avp := range avp.ToGroup() {
-					if avp.Code == 30 {
-						assert.Equal(t, "dataconnect", *avp.ToString())
-						return
-					}
-				}
-			}
-		}
-	}
-	t.Fatal("Grouped AVP not found")
+	apn := diameter.ReadAvps(decodedData).GetFirst(873, 10415).ToGroup().GetFirst(874, 10415).ToGroup().GetFirst(30, 0).ToString()
+	assert.Equal(t, "dataconnect", *apn)
 }
 
 func Test_diameter_write_grouped_avp(t *testing.T) {
@@ -78,17 +67,8 @@ func Test_diameter_write_grouped_avp(t *testing.T) {
 	message := diameter.NewMessage(1, 0, 265, 1, [4]byte{0, 0, 0, 0}, [4]byte{0, 0, 0, 0}, avps)
 	bytes := message.ToBytes()
 	message = *diameter.ReadMessage(bytes)
-	for _, avp := range message.Avps {
-		if avp.Code == 456 {
-			for _, avp := range avp.ToGroup() {
-				if avp.Code == 432 {
-					assert.Equal(t, uint32(1), *avp.ToUint32())
-					return
-				}
-			}
-		}
-	}
-	t.Fatal("Grouped AVP not found")
+	avp := message.Avps.GetFirst(456, 0).ToGroup().GetFirst(432, 0)
+	assert.Equal(t, uint32(1), *avp.ToUint32())
 }
 
 func Test_diameter_timestamp(t *testing.T) {
