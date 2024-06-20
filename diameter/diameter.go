@@ -221,6 +221,9 @@ func (message Message) ToBytes() []byte {
 }
 
 func (avps Avps) Get(code Code, vendorId VendorId) Avps {
+	if avps == nil {
+		return nil
+	}
 	filteredAvps := NewAvps()
 	for _, avp := range avps {
 		if avp.Code == code && avp.VendorId == vendorId {
@@ -231,6 +234,9 @@ func (avps Avps) Get(code Code, vendorId VendorId) Avps {
 }
 
 func (avps Avps) GetFirst(code Code, vendorId VendorId) *Avp {
+	if avps == nil {
+		return nil
+	}
 	for _, avp := range avps {
 		if avp.Code == code && avp.VendorId == vendorId {
 			return &avp
@@ -309,6 +315,9 @@ func (avp Avp) ToGroup() Avps {
 }
 
 func ReadAvps(bytes []byte) Avps {
+	if bytes == nil {
+		return nil
+	}
 	offset := 0
 	avps := NewAvps()
 	for offset < len(bytes) {

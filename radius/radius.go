@@ -151,6 +151,9 @@ func (message Message) ToBytes() []byte {
 }
 
 func (avps Avps) Get(attributeType AttributeType, vendorId VendorId) []Avp {
+	if avps == nil {
+		return nil
+	}
 	filteredAvps := NewAvps()
 	for _, avp := range avps {
 		if avp.Type == attributeType && avp.VendorId == vendorId {
@@ -161,6 +164,9 @@ func (avps Avps) Get(attributeType AttributeType, vendorId VendorId) []Avp {
 }
 
 func (avps Avps) GetFirst(attributeType AttributeType, vendorId VendorId) *Avp {
+	if avps == nil {
+		return nil
+	}
 	for _, avp := range avps {
 		if avp.Type == attributeType && avp.VendorId == vendorId {
 			return &avp
