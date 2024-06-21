@@ -180,12 +180,30 @@ func (avp *Avp) ToString() *string {
 	return &value
 }
 
+func (avp *Avp) ToStringOrDefault() string {
+	value := avp.ToString()
+	if value == nil {
+		var value string
+		return value
+	}
+	return *value
+}
+
 func (avp *Avp) ToUint32() *uint32 {
 	if avp == nil || avp.Data == nil {
 		return nil
 	}
 	value := binary.BigEndian.Uint32(avp.Data)
 	return &value
+}
+
+func (avp *Avp) ToUint32OrDefault() uint32 {
+	value := avp.ToUint32()
+	if value == nil {
+		var value uint32
+		return value
+	}
+	return *value
 }
 
 func (avp *Avp) ToNetIP() *net.IP {
@@ -196,6 +214,15 @@ func (avp *Avp) ToNetIP() *net.IP {
 	return &value
 }
 
+func (avp *Avp) ToNetIPOrDefault() net.IP {
+	value := avp.ToNetIP()
+	if value == nil {
+		var value net.IP
+		return value
+	}
+	return *value
+}
+
 func (avp *Avp) ToTime() *time.Time {
 	if avp == nil || avp.Data == nil {
 		return nil
@@ -203,6 +230,15 @@ func (avp *Avp) ToTime() *time.Time {
 	timestamp := int64(binary.BigEndian.Uint32(avp.Data))
 	value := time.Unix(timestamp, 0)
 	return &value
+}
+
+func (avp *Avp) ToTimeOrDefault() time.Time {
+	value := avp.ToTime()
+	if value == nil {
+		var value time.Time
+		return value
+	}
+	return *value
 }
 
 func readAvps(bytes []byte) Avps {

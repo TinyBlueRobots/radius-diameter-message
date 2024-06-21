@@ -2,6 +2,7 @@ package tests
 
 import (
 	"encoding/base64"
+	"net"
 	"testing"
 	"time"
 
@@ -61,4 +62,17 @@ func Test_radius_nil(t *testing.T) {
 	var avps radius.Avps
 	avp := avps.GetFirst(1, 0).ToString()
 	assert.Nil(t, avp)
+}
+
+func Test_radius_string_default(t *testing.T) {
+	avps := radius.NewAvps()
+	avpString := avps.GetFirst(1, 0).ToStringOrDefault()
+	assert.Equal(t, "", avpString)
+	avpUint32 := avps.GetFirst(1, 0).ToUint32OrDefault()
+	assert.Equal(t, uint32(0), avpUint32)
+	avpTime := avps.GetFirst(1, 0).ToTimeOrDefault()
+	assert.Equal(t, time.Time{}, avpTime)
+	avpNetIP := avps.GetFirst(1, 0).ToNetIPOrDefault()
+	var defaultNetIp net.IP
+	assert.Equal(t, defaultNetIp, avpNetIP)
 }

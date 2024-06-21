@@ -243,9 +243,17 @@ func (avp *Avp) ToString() *string {
 	if avp == nil || avp.Data == nil {
 		return nil
 	}
-
 	value := string(avp.Data)
 	return &value
+}
+
+func (avp *Avp) ToStringOrDefault() string {
+	value := avp.ToString()
+	if value == nil {
+		var value string
+		return value
+	}
+	return *value
 }
 
 func (avp *Avp) ToUint32() *uint32 {
@@ -256,12 +264,30 @@ func (avp *Avp) ToUint32() *uint32 {
 	return &value
 }
 
+func (avp *Avp) ToUint32OrDefault() uint32 {
+	value := avp.ToUint32()
+	if value == nil {
+		var value uint32
+		return value
+	}
+	return *value
+}
+
 func (avp *Avp) ToUint64() *uint64 {
 	if avp == nil || avp.Data == nil {
 		return nil
 	}
 	value := binary.BigEndian.Uint64(avp.Data)
 	return &value
+}
+
+func (avp *Avp) ToUint64OrDefault() uint64 {
+	value := avp.ToUint64()
+	if value == nil {
+		var value uint64
+		return value
+	}
+	return *value
 }
 
 func (avp *Avp) ToFloat32() *float32 {
@@ -273,6 +299,15 @@ func (avp *Avp) ToFloat32() *float32 {
 	return &value
 }
 
+func (avp *Avp) ToFloat32OrDefault() float32 {
+	value := avp.ToFloat32()
+	if value == nil {
+		var value float32
+		return value
+	}
+	return *value
+}
+
 func (avp *Avp) ToFloat64() *float64 {
 	if avp == nil || avp.Data == nil {
 		return nil
@@ -280,6 +315,15 @@ func (avp *Avp) ToFloat64() *float64 {
 	bits := binary.BigEndian.Uint64(avp.Data)
 	value := math.Float64frombits(bits)
 	return &value
+}
+
+func (avp *Avp) ToFloat64OrDefault() float64 {
+	value := avp.ToFloat64()
+	if value == nil {
+		var value float64
+		return value
+	}
+	return *value
 }
 
 func (avp *Avp) ToNetIP() *net.IP {
@@ -295,6 +339,15 @@ func (avp *Avp) ToNetIP() *net.IP {
 	}
 }
 
+func (avp *Avp) ToNetIPOrDefault() net.IP {
+	value := avp.ToNetIP()
+	if value == nil {
+		var value net.IP
+		return value
+	}
+	return *value
+}
+
 func (avp *Avp) ToTime() *time.Time {
 	if avp == nil || avp.Data == nil {
 		return nil
@@ -302,6 +355,15 @@ func (avp *Avp) ToTime() *time.Time {
 	timestamp := int64(binary.BigEndian.Uint32(avp.Data))
 	value := time.Unix(timestamp-2208988800, 0)
 	return &value
+}
+
+func (avp *Avp) ToTimeOrDefault() time.Time {
+	value := avp.ToTime()
+	if value == nil {
+		var value time.Time
+		return value
+	}
+	return *value
 }
 
 func (avp *Avp) ToGroup() Avps {

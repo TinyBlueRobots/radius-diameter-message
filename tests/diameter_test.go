@@ -65,6 +65,21 @@ func Test_diameter_nil(t *testing.T) {
 	assert.Nil(t, value)
 }
 
+func Test_diameter_string_default(t *testing.T) {
+	avps := diameter.NewAvps()
+	avpString := avps.GetFirst(1, 0).ToStringOrDefault()
+	assert.Equal(t, "", avpString)
+	avpUint32 := avps.GetFirst(1, 0).ToUint32OrDefault()
+	assert.Equal(t, uint32(0), avpUint32)
+	avpUint64 := avps.GetFirst(1, 0).ToUint64OrDefault()
+	assert.Equal(t, uint64(0), avpUint64)
+	avpTime := avps.GetFirst(1, 0).ToTimeOrDefault()
+	assert.Equal(t, time.Time{}, avpTime)
+	avpNetIP := avps.GetFirst(1, 0).ToNetIPOrDefault()
+	var defaultNetIp net.IP
+	assert.Equal(t, defaultNetIp, avpNetIP)
+}
+
 func Test_diameter_write_grouped_avp(t *testing.T) {
 	avps := diameter.NewAvps()
 	group := diameter.NewAvps()
