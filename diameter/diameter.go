@@ -370,10 +370,10 @@ func (avp *Avp) ToGroup() Avps {
 	if avp == nil || avp.Data == nil {
 		return NewAvps()
 	}
-	return ReadAvps(avp.Data)
+	return readAvps(avp.Data)
 }
 
-func ReadAvps(bytes []byte) Avps {
+func readAvps(bytes []byte) Avps {
 	offset := 0
 	avps := NewAvps()
 	for offset < len(bytes) {
@@ -418,7 +418,7 @@ func ReadMessage(bytes []byte) *Message {
 		ApplicationId: ApplicationId(binary.BigEndian.Uint32(bytes[8:12])),
 		HopByHopId:    hopByHopId,
 		EndToEndId:    endToEndId,
-		Avps:          ReadAvps(bytes[20:]),
+		Avps:          readAvps(bytes[20:]),
 	}
 	return &message
 }
