@@ -55,7 +55,10 @@ func Test_diameter_read_grouped_avp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	apn := diameter.ReadAvps(decodedData).GetFirst(873, 10415).ToGroup().GetFirst(874, 10415).ToGroup().GetFirst(30, 0).ToString()
+	messageData := make([]byte, 20+len(decodedData))
+	copy(messageData[20:], decodedData)
+	message := *diameter.ReadMessage(messageData)
+	apn := message.Avps.GetFirst(873, 10415).ToGroup().GetFirst(874, 10415).ToGroup().GetFirst(30, 0).ToString()
 	assert.Equal(t, "dataconnect", *apn)
 }
 
@@ -98,7 +101,10 @@ func Test_diameter_timestamp(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	avp := diameter.ReadAvps(decodedData).GetFirst(55, 0)
+	messageData := make([]byte, 20+len(decodedData))
+	copy(messageData[20:], decodedData)
+	message := *diameter.ReadMessage(messageData)
+	avp := message.Avps.GetFirst(55, 0)
 	expected := time.Time(time.Date(2024, time.May, 15, 17, 50, 37, 0, time.Local))
 	assert.Equal(t, expected, *avp.ToTime())
 }
