@@ -56,4 +56,7 @@ Read an AVP value or use the default if it's nil:
 `value := avp.ToStringOrDefault()`  
 
 Chain these together to read into deeply grouped AVPs:  
-`avp := avps.GetFirst(873, 10415).ToGroup().GetFirst(874, 10415).ToGroup().GetFirst(30, 0).ToString()`
+`avp := avps.GetFirst(873, 10415).ToGroup().GetFirst(874, 10415).ToGroup().GetFirst(30, 0).ToString()`  
+
+Add flags to an AVP:  
+`avp = avp.WithFlags(0x40)`
