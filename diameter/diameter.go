@@ -21,7 +21,10 @@ type Avp struct {
 	padding  uint32
 }
 
-func (avp Avp) WithFlags(flags Flags) Avp {
+func (avp *Avp) WithFlags(flags Flags) *Avp {
+	if avp == nil {
+		return nil
+	}
 	avp.Flags = flags
 	return avp
 }
