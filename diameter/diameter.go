@@ -21,6 +21,11 @@ type Avp struct {
 	padding  uint32
 }
 
+func (avp Avp) WithFlags(flags Flags) Avp {
+	avp.Flags = flags
+	return avp
+}
+
 func NewAvp(code Code, flags Flags, vendorId VendorId, avpData avpData) Avp {
 	padding := uint32(len(avpData) % 4)
 	if padding != 0 {
