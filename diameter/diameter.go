@@ -21,12 +21,12 @@ type Avp struct {
 	padding  uint32
 }
 
-func (avp *Avp) WithFlags(flags Flags) *Avp {
-	if avp == nil {
+func (a *Avp) WithFlags(flags Flags) *Avp {
+	if a == nil {
 		return nil
 	}
-	avp.Flags = flags
-	return avp
+	a.Flags = flags
+	return a
 }
 
 func NewAvp(code Code, flags Flags, vendorId VendorId, avpData avpData) Avp {
@@ -102,12 +102,12 @@ func NewAvpTime(code Code, flags Flags, vendorId VendorId, value time.Time) Avp 
 	return NewAvp(code, flags, vendorId, buffer)
 }
 
-func (avp Avp) ToBytes() []byte {
-	bytes := make([]byte, avp.length+avp.padding)
-	binary.BigEndian.PutUint32(bytes, uint32(avp.Code))
-	bytes[4] = byte(avp.Flags)
-	copy(bytes[5:8], writeUInt24(avp.length))
-	copy(bytes[8:], avp.Data)
+func (a Avp) ToBytes() []byte {
+	bytes := make([]byte, a.length+a.padding)
+	binary.BigEndian.PutUint32(bytes, uint32(a.Code))
+	bytes[4] = byte(a.Flags)
+	copy(bytes[5:8], writeUInt24(a.length))
+	copy(bytes[8:], a.Data)
 	return bytes
 }
 
@@ -117,59 +117,59 @@ func NewAvps() Avps {
 	return make([]Avp, 0)
 }
 
-func (avps Avps) ToBytes() []byte {
+func (a Avps) ToBytes() []byte {
 	bytes := make([]byte, 0)
-	for _, avp := range avps {
+	for _, avp := range a {
 		bytes = append(bytes, avp.ToBytes()...)
 	}
 	return bytes
 }
 
-func (avps Avps) Add(code Code, vendorId VendorId, flags Flags, data avpData) Avps {
-	return append(avps, NewAvp(code, flags, vendorId, data))
+func (a Avps) Add(code Code, vendorId VendorId, flags Flags, data avpData) Avps {
+	return append(a, NewAvp(code, flags, vendorId, data))
 }
 
-func (avps Avps) AddAvp(avp Avp) Avps {
-	return append(avps, avp)
+func (a Avps) AddAvp(avp Avp) Avps {
+	return append(a, avp)
 }
 
-func (avps Avps) AddString(code Code, vendorId VendorId, flags Flags, value string) Avps {
-	return append(avps, NewAvpString(code, flags, vendorId, value))
+func (a Avps) AddString(code Code, vendorId VendorId, flags Flags, value string) Avps {
+	return append(a, NewAvpString(code, flags, vendorId, value))
 }
 
-func (avps Avps) AddUint32(code Code, vendorId VendorId, flags Flags, value uint32) Avps {
-	return append(avps, NewAvpUint32(code, flags, vendorId, value))
+func (a Avps) AddUint32(code Code, vendorId VendorId, flags Flags, value uint32) Avps {
+	return append(a, NewAvpUint32(code, flags, vendorId, value))
 }
 
-func (avps Avps) AddUint64(code Code, vendorId VendorId, flags Flags, value uint64) Avps {
-	return append(avps, NewAvpUint64(code, flags, vendorId, value))
+func (a Avps) AddUint64(code Code, vendorId VendorId, flags Flags, value uint64) Avps {
+	return append(a, NewAvpUint64(code, flags, vendorId, value))
 }
 
-func (avps Avps) AddFloat32(code Code, vendorId VendorId, flags Flags, value float32) Avps {
-	return append(avps, NewAvpFloat32(code, flags, vendorId, value))
+func (a Avps) AddFloat32(code Code, vendorId VendorId, flags Flags, value float32) Avps {
+	return append(a, NewAvpFloat32(code, flags, vendorId, value))
 }
 
-func (avps Avps) AddFloat64(code Code, vendorId VendorId, flags Flags, value float64) Avps {
-	return append(avps, NewAvpFloat64(code, flags, vendorId, value))
+func (a Avps) AddFloat64(code Code, vendorId VendorId, flags Flags, value float64) Avps {
+	return append(a, NewAvpFloat64(code, flags, vendorId, value))
 }
 
-func (avps Avps) AddNetIP(code Code, vendorId VendorId, flags Flags, value net.IP) Avps {
-	return append(avps, NewAvpNetIP(code, flags, vendorId, value))
+func (a Avps) AddNetIP(code Code, vendorId VendorId, flags Flags, value net.IP) Avps {
+	return append(a, NewAvpNetIP(code, flags, vendorId, value))
 }
 
-func (avps Avps) AddTime(code Code, vendorId VendorId, flags Flags, value time.Time) Avps {
-	return append(avps, NewAvpTime(code, flags, vendorId, value))
+func (a Avps) AddTime(code Code, vendorId VendorId, flags Flags, value time.Time) Avps {
+	return append(a, NewAvpTime(code, flags, vendorId, value))
 }
 
-func (avps Avps) AddGroup(code Code, vendorId VendorId, flags Flags, groupAvps Avps) Avps {
-	return append(avps, NewAvpGroup(code, flags, vendorId, groupAvps))
+func (a Avps) AddGroup(code Code, vendorId VendorId, flags Flags, groupAvps Avps) Avps {
+	return append(a, NewAvpGroup(code, flags, vendorId, groupAvps))
 }
 
 type ApplicationId uint32
 
-func (applicationId ApplicationId) toBytes() []byte {
+func (a ApplicationId) toBytes() []byte {
 	bytes := make([]byte, 4)
-	binary.BigEndian.PutUint32(bytes, uint32(applicationId))
+	binary.BigEndian.PutUint32(bytes, uint32(a))
 	return bytes
 }
 
@@ -181,8 +181,8 @@ func writeUInt24(value uint32) []byte {
 
 type CommandCode uint32
 
-func (commandCode CommandCode) toBytes() []byte {
-	return writeUInt24(uint32(commandCode))
+func (c CommandCode) toBytes() []byte {
+	return writeUInt24(uint32(c))
 }
 
 type Message struct {
@@ -195,9 +195,9 @@ type Message struct {
 	Avps          Avps
 }
 
-func (message Message) length() uint32 {
+func (m Message) length() uint32 {
 	length := uint32(20)
-	for _, avp := range message.Avps {
+	for _, avp := range m.Avps {
 		length += avp.length + avp.padding
 	}
 	return length
@@ -228,9 +228,9 @@ func (message Message) ToBytes() []byte {
 	return bytes
 }
 
-func (avps Avps) Get(code Code, vendorId VendorId) Avps {
+func (a Avps) Get(code Code, vendorId VendorId) Avps {
 	filteredAvps := NewAvps()
-	for _, avp := range avps {
+	for _, avp := range a {
 		if avp.Code == code && avp.VendorId == vendorId {
 			filteredAvps = append(filteredAvps, avp)
 		}
@@ -238,8 +238,8 @@ func (avps Avps) Get(code Code, vendorId VendorId) Avps {
 	return filteredAvps
 }
 
-func (avps Avps) GetFirst(code Code, vendorId VendorId) *Avp {
-	for _, avp := range avps {
+func (a Avps) GetFirst(code Code, vendorId VendorId) *Avp {
+	for _, avp := range a {
 		if avp.Code == code && avp.VendorId == vendorId {
 			return &avp
 		}
@@ -247,16 +247,16 @@ func (avps Avps) GetFirst(code Code, vendorId VendorId) *Avp {
 	return nil
 }
 
-func (avp *Avp) ToString() *string {
-	if avp == nil || avp.Data == nil {
+func (a *Avp) ToString() *string {
+	if a == nil || a.Data == nil {
 		return nil
 	}
-	value := string(avp.Data)
+	value := string(a.Data)
 	return &value
 }
 
-func (avp *Avp) ToStringOrDefault() string {
-	value := avp.ToString()
+func (a *Avp) ToStringOrDefault() string {
+	value := a.ToString()
 	if value == nil {
 		var value string
 		return value
@@ -264,16 +264,16 @@ func (avp *Avp) ToStringOrDefault() string {
 	return *value
 }
 
-func (avp *Avp) ToUint32() *uint32 {
-	if avp == nil || avp.Data == nil {
+func (a *Avp) ToUint32() *uint32 {
+	if a == nil || a.Data == nil {
 		return nil
 	}
-	value := binary.BigEndian.Uint32(avp.Data)
+	value := binary.BigEndian.Uint32(a.Data)
 	return &value
 }
 
-func (avp *Avp) ToUint32OrDefault() uint32 {
-	value := avp.ToUint32()
+func (a *Avp) ToUint32OrDefault() uint32 {
+	value := a.ToUint32()
 	if value == nil {
 		var value uint32
 		return value
@@ -281,16 +281,16 @@ func (avp *Avp) ToUint32OrDefault() uint32 {
 	return *value
 }
 
-func (avp *Avp) ToUint64() *uint64 {
-	if avp == nil || avp.Data == nil {
+func (a *Avp) ToUint64() *uint64 {
+	if a == nil || a.Data == nil {
 		return nil
 	}
-	value := binary.BigEndian.Uint64(avp.Data)
+	value := binary.BigEndian.Uint64(a.Data)
 	return &value
 }
 
-func (avp *Avp) ToUint64OrDefault() uint64 {
-	value := avp.ToUint64()
+func (a *Avp) ToUint64OrDefault() uint64 {
+	value := a.ToUint64()
 	if value == nil {
 		var value uint64
 		return value
@@ -298,17 +298,17 @@ func (avp *Avp) ToUint64OrDefault() uint64 {
 	return *value
 }
 
-func (avp *Avp) ToFloat32() *float32 {
-	if avp == nil || avp.Data == nil {
+func (a *Avp) ToFloat32() *float32 {
+	if a == nil || a.Data == nil {
 		return nil
 	}
-	bits := binary.BigEndian.Uint32(avp.Data)
+	bits := binary.BigEndian.Uint32(a.Data)
 	value := math.Float32frombits(bits)
 	return &value
 }
 
-func (avp *Avp) ToFloat32OrDefault() float32 {
-	value := avp.ToFloat32()
+func (a *Avp) ToFloat32OrDefault() float32 {
+	value := a.ToFloat32()
 	if value == nil {
 		var value float32
 		return value
@@ -316,17 +316,17 @@ func (avp *Avp) ToFloat32OrDefault() float32 {
 	return *value
 }
 
-func (avp *Avp) ToFloat64() *float64 {
-	if avp == nil || avp.Data == nil {
+func (a *Avp) ToFloat64() *float64 {
+	if a == nil || a.Data == nil {
 		return nil
 	}
-	bits := binary.BigEndian.Uint64(avp.Data)
+	bits := binary.BigEndian.Uint64(a.Data)
 	value := math.Float64frombits(bits)
 	return &value
 }
 
-func (avp *Avp) ToFloat64OrDefault() float64 {
-	value := avp.ToFloat64()
+func (a *Avp) ToFloat64OrDefault() float64 {
+	value := a.ToFloat64()
 	if value == nil {
 		var value float64
 		return value
@@ -334,21 +334,21 @@ func (avp *Avp) ToFloat64OrDefault() float64 {
 	return *value
 }
 
-func (avp *Avp) ToNetIP() *net.IP {
-	if avp == nil || avp.Data == nil {
+func (a *Avp) ToNetIP() *net.IP {
+	if a == nil || a.Data == nil {
 		return nil
 	}
-	if avp.Data[1] == 1 {
-		value := net.IP(avp.Data[2:6])
+	if a.Data[1] == 1 {
+		value := net.IP(a.Data[2:6])
 		return &value
 	} else {
-		value := net.IP(avp.Data[2:18])
+		value := net.IP(a.Data[2:18])
 		return &value
 	}
 }
 
-func (avp *Avp) ToNetIPOrDefault() net.IP {
-	value := avp.ToNetIP()
+func (a *Avp) ToNetIPOrDefault() net.IP {
+	value := a.ToNetIP()
 	if value == nil {
 		var value net.IP
 		return value
@@ -356,17 +356,17 @@ func (avp *Avp) ToNetIPOrDefault() net.IP {
 	return *value
 }
 
-func (avp *Avp) ToTime() *time.Time {
-	if avp == nil || avp.Data == nil {
+func (a *Avp) ToTime() *time.Time {
+	if a == nil || a.Data == nil {
 		return nil
 	}
-	timestamp := int64(binary.BigEndian.Uint32(avp.Data))
+	timestamp := int64(binary.BigEndian.Uint32(a.Data))
 	value := time.Unix(timestamp-2208988800, 0)
 	return &value
 }
 
-func (avp *Avp) ToTimeOrDefault() time.Time {
-	value := avp.ToTime()
+func (a *Avp) ToTimeOrDefault() time.Time {
+	value := a.ToTime()
 	if value == nil {
 		var value time.Time
 		return value
@@ -374,11 +374,11 @@ func (avp *Avp) ToTimeOrDefault() time.Time {
 	return *value
 }
 
-func (avp *Avp) ToGroup() Avps {
-	if avp == nil || avp.Data == nil {
+func (a *Avp) ToGroup() Avps {
+	if a == nil || a.Data == nil {
 		return NewAvps()
 	}
-	return readAvps(avp.Data)
+	return readAvps(a.Data)
 }
 
 func readAvps(bytes []byte) Avps {
