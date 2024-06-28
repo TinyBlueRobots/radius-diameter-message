@@ -107,7 +107,12 @@ func (a Avp) ToBytes() []byte {
 	binary.BigEndian.PutUint32(bytes, uint32(a.Code))
 	bytes[4] = byte(a.Flags)
 	copy(bytes[5:8], writeUInt24(a.length))
-	copy(bytes[8:], a.Data)
+	if a.VendorId != 0 {
+		binary.BigEndian.PutUint32(bytes[8:12], uint32(a.VendorId))
+		copy(bytes[12:], a.Data)
+	} else {
+		copy(bytes[8:], a.Data)
+	}
 	return bytes
 }
 
@@ -125,7 +130,7 @@ func (a Avps) ToBytes() []byte {
 	return bytes
 }
 
-func (a Avps) Add(code Code, vendorId VendorId, flags Flags, data avpData) Avps {
+func (a Avps) Add(code Code, flags Flags, vendorId VendorId, data avpData) Avps {
 	return append(a, NewAvp(code, flags, vendorId, data))
 }
 
@@ -133,35 +138,35 @@ func (a Avps) AddAvp(avps ...Avp) Avps {
 	return append(a, avps...)
 }
 
-func (a Avps) AddString(code Code, vendorId VendorId, flags Flags, value string) Avps {
+func (a Avps) AddString(code Code, flags Flags, vendorId VendorId, value string) Avps {
 	return append(a, NewAvpString(code, flags, vendorId, value))
 }
 
-func (a Avps) AddUint32(code Code, vendorId VendorId, flags Flags, value uint32) Avps {
+func (a Avps) AddUint32(code Code, flags Flags, vendorId VendorId, value uint32) Avps {
 	return append(a, NewAvpUint32(code, flags, vendorId, value))
 }
 
-func (a Avps) AddUint64(code Code, vendorId VendorId, flags Flags, value uint64) Avps {
+func (a Avps) AddUint64(code Code, flags Flags, vendorId VendorId, value uint64) Avps {
 	return append(a, NewAvpUint64(code, flags, vendorId, value))
 }
 
-func (a Avps) AddFloat32(code Code, vendorId VendorId, flags Flags, value float32) Avps {
+func (a Avps) AddFloat32(code Code, flags Flags, vendorId VendorId, value float32) Avps {
 	return append(a, NewAvpFloat32(code, flags, vendorId, value))
 }
 
-func (a Avps) AddFloat64(code Code, vendorId VendorId, flags Flags, value float64) Avps {
+func (a Avps) AddFloat64(code Code, flags Flags, vendorId VendorId, value float64) Avps {
 	return append(a, NewAvpFloat64(code, flags, vendorId, value))
 }
 
-func (a Avps) AddNetIP(code Code, vendorId VendorId, flags Flags, value net.IP) Avps {
+func (a Avps) AddNetIP(code Code, flags Flags, vendorId VendorId, value net.IP) Avps {
 	return append(a, NewAvpNetIP(code, flags, vendorId, value))
 }
 
-func (a Avps) AddTime(code Code, vendorId VendorId, flags Flags, value time.Time) Avps {
+func (a Avps) AddTime(code Code, flags Flags, vendorId VendorId, value time.Time) Avps {
 	return append(a, NewAvpTime(code, flags, vendorId, value))
 }
 
-func (a Avps) AddGroup(code Code, vendorId VendorId, flags Flags, groupAvps Avps) Avps {
+func (a Avps) AddGroup(code Code, flags Flags, vendorId VendorId, groupAvps Avps) Avps {
 	return append(a, NewAvpGroup(code, flags, vendorId, groupAvps))
 }
 

@@ -17,9 +17,9 @@ const (
 
 func Test_diameter_message(t *testing.T) {
 	avps := diameter.NewAvps()
-	avps = avps.AddUint32(258, 0, mandatoryFlags, 1)
+	avps = avps.AddUint32(258, mandatoryFlags, 0, 1)
 	ipAddress := net.IPv4(100, 98, 179, 174)
-	avps = avps.AddNetIP(257, 0, mandatoryFlags, ipAddress)
+	avps = avps.AddNetIP(257, mandatoryFlags, 0, ipAddress)
 	message := diameter.NewMessage(1, requestFlags, 265, 1, [4]byte{0, 0, 0, 0}, [4]byte{0, 0, 0, 0}, avps)
 	bytes := message.ToBytes()
 	version := bytes[0]
@@ -112,4 +112,14 @@ func Test_diameter_timestamp(t *testing.T) {
 func Test_diameter_bytes(t *testing.T) {
 	avp := diameter.NewAvp(1, 0, 0, []byte{0x0, 0x0, 0x0, 0x1})
 	assert.Equal(t, []byte{0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0xc, 0x0, 0x0, 0x0, 0x1}, avp.ToBytes())
+}
+
+func Test_diameter_vendor_avp(t *testing.T) {
+	base64Data := "AAADZcAAABAAACivBPc8Zg=="
+	decodedData, err := base64.StdEncoding.DecodeString(base64Data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	avp := diameter.NewAvpUint32(869, 0xc0, 10415, 83311718)
+	assert.Equal(t, decodedData, avp.ToBytes())
 }
