@@ -134,7 +134,7 @@ func (a Avps) Add(code Code, flags Flags, vendorId VendorId, data avpData) Avps 
 	return append(a, NewAvp(code, flags, vendorId, data))
 }
 
-func (a Avps) AddAvp(avps ...Avp) Avps {
+func (a Avps) AddAvps(avps ...Avp) Avps {
 	return append(a, avps...)
 }
 

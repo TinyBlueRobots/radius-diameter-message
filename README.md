@@ -37,6 +37,12 @@ All data types are supported, for brevity the examples will use strings
 Create an AVP:  
 `avp := diameter.NewAvpString(100, 0x0, 0, "foo")`  
 
+Create an AVP slice:  
+`avps := diameter.NewAvps()`
+
+Add an AVP to a slice:  
+`avps = avps.AddAvps(avp)`  
+
 Create and add an AVP to a slice:  
 `avps = avps.AddString(100, 0x0, 0, "foo")`  
 
