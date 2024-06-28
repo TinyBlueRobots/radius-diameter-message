@@ -133,6 +133,10 @@ func (a Avps) AddAvp(avp Avp) Avps {
 	return append(a, avp)
 }
 
+func (a Avps) AddAvps(avps ...Avp) Avps {
+	return append(a, avps...)
+}
+
 func (a Avps) AddString(code Code, vendorId VendorId, flags Flags, value string) Avps {
 	return append(a, NewAvpString(code, flags, vendorId, value))
 }

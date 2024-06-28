@@ -84,6 +84,10 @@ func (a Avps) AddAvp(avp Avp) Avps {
 	return append(a, avp)
 }
 
+func (a Avps) AddAvps(avps ...Avp) Avps {
+	return append(a, avps...)
+}
+
 func (a Avps) AddString(attributeType AttributeType, vendorId VendorId, value string) Avps {
 	return append(a, NewAvpString(attributeType, vendorId, value))
 }
