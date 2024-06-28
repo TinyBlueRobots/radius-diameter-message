@@ -35,10 +35,10 @@ assert.Equal(t, ipAddress, *avp.ToNetIP())
 All data types are supported, for brevity the examples will use strings
 
 Create an AVP:  
-`avp := diameter.NewAvpString(100, 0, 0x0, "foo")`  
+`avp := diameter.NewAvpString(100, 0x0, 0, "foo")`  
 
 Create and add an AVP to a slice:  
-`avps = avps.AddString(100, 0, 0x0, "foo")`  
+`avps = avps.AddString(100, 0x0, 0, "foo")`  
 
 Read a single AVP of a type:  
 `avp := avps.GetFirst(100, 0)`  
