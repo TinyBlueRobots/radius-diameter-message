@@ -1,6 +1,6 @@
 # Radius Diameter Message
 
-This library provides a simple interface for reading and writing Radius and Diameter messages. It allows for the conversion of `[]bytes` into a `Message` structure, and supports the construction of Messages and Attribute-Value Pairs (AVPs).
+This library provides a simple interface for reading and writing messages for the Radius and Diameter protocols in golang. It allows for the conversion of `[]bytes` into a `Message` structure, and supports the construction of Messages and Attribute-Value Pairs (AVPs).
 
 ## Dictionary types
 To keep the library small there are no generated AVP dictionaries included, but types are provided to create your own:
