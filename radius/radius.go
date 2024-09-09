@@ -172,6 +172,13 @@ func (a Avps) GetFirst(attributeType AttributeType, vendorId VendorId) *Avp {
 	return nil
 }
 
+func (a *Avp) ToData() []byte {
+	if a == nil {
+		return nil
+	}
+	return a.Data
+}
+
 func (a *Avp) ToString() *string {
 	if a == nil || a.Data == nil {
 		return nil

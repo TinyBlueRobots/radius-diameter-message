@@ -75,4 +75,6 @@ func Test_radius_string_default(t *testing.T) {
 	avpNetIP := avps.GetFirst(1, 0).ToNetIPOrDefault()
 	var defaultNetIp net.IP
 	assert.Equal(t, defaultNetIp, avpNetIP)
+	avpData := avps.GetFirst(1, 0).ToData()
+	assert.Nil(t, avpData)
 }
