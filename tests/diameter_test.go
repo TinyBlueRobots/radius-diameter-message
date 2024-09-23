@@ -20,7 +20,7 @@ func Test_diameter_message(t *testing.T) {
 	avps = avps.AddUint32(258, mandatoryFlags, 0, 1)
 	ipAddress := net.IPv4(100, 98, 179, 174)
 	avps = avps.AddNetIP(257, mandatoryFlags, 0, ipAddress)
-	message := diameter.NewMessage(1, requestFlags, 265, 1, [4]byte{0, 0, 0, 0}, [4]byte{0, 0, 0, 0}, avps)
+	message := diameter.NewMessage(1, requestFlags, 265, 1, [4]byte{0, 0, 0, 0}, [4]byte{0, 0, 0, 0}, avps...)
 	bytes := message.ToBytes()
 	version := bytes[0]
 	length := bytes[1:4]
@@ -86,10 +86,19 @@ func Test_diameter_string_default(t *testing.T) {
 }
 
 func Test_diameter_write_grouped_avp(t *testing.T) {
-	avps := diameter.NewAvps()
 	group := diameter.NewAvps()
 	group = group.AddUint32(432, 0, 0, 1)
-	avps = avps.AddGroup(456, 0, 0, group)
+	avps := diameter.NewAvps()
+	avps = avps.AddGroup(456, 0, 0, group...)
+	message := diameter.NewMessage(1, 0, 265, 1, [4]byte{0, 0, 0, 0}, [4]byte{0, 0, 0, 0}, avps...)
+	bytes := message.ToBytes()
+	message = *diameter.ReadMessage(bytes)
+	avp := message.Avps.GetFirst(456, 0).ToGroup().GetFirst(432, 0)
+	assert.Equal(t, uint32(1), *avp.ToUint32())
+}
+
+func Test_diameter_write_grouped_avp_with_spread(t *testing.T) {
+	avps := diameter.NewAvpGroup(456, 0, 0, diameter.NewAvpUint32(432, 0, 0, 1))
 	message := diameter.NewMessage(1, 0, 265, 1, [4]byte{0, 0, 0, 0}, [4]byte{0, 0, 0, 0}, avps)
 	bytes := message.ToBytes()
 	message = *diameter.ReadMessage(bytes)

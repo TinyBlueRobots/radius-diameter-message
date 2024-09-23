@@ -125,7 +125,7 @@ func (m Message) length() uint16 {
 	return length
 }
 
-func NewMessage(code Code, identifier byte, authenticator [16]byte, avps Avps) Message {
+func NewMessage(code Code, identifier byte, authenticator [16]byte, avps ...Avp) Message {
 	length := uint16(20)
 	for _, avp := range avps {
 		length += uint16(avp.length)

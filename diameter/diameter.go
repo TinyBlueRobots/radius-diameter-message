@@ -48,8 +48,9 @@ func NewAvp(code Code, flags Flags, vendorId VendorId, avpData avpData) Avp {
 	}
 }
 
-func NewAvpGroup(code Code, flags Flags, vendorId VendorId, avps Avps) Avp {
-	return NewAvp(code, flags, vendorId, avps.ToBytes())
+func NewAvpGroup(code Code, flags Flags, vendorId VendorId, avps ...Avp) Avp {
+	_avps := Avps(avps)
+	return NewAvp(code, flags, vendorId, _avps.ToBytes())
 }
 
 func NewAvpString(code Code, flags Flags, vendorId VendorId, value string) Avp {
@@ -166,8 +167,8 @@ func (a Avps) AddTime(code Code, flags Flags, vendorId VendorId, value time.Time
 	return append(a, NewAvpTime(code, flags, vendorId, value))
 }
 
-func (a Avps) AddGroup(code Code, flags Flags, vendorId VendorId, groupAvps Avps) Avps {
-	return append(a, NewAvpGroup(code, flags, vendorId, groupAvps))
+func (a Avps) AddGroup(code Code, flags Flags, vendorId VendorId, groupAvps ...Avp) Avps {
+	return append(a, NewAvpGroup(code, flags, vendorId, groupAvps...))
 }
 
 type ApplicationId uint32
@@ -208,7 +209,7 @@ func (m Message) length() uint32 {
 	return length
 }
 
-func NewMessage(version byte, flags Flags, commandCode CommandCode, applicationId ApplicationId, hopByHopId [4]byte, endToEndId [4]byte, avps Avps) Message {
+func NewMessage(version byte, flags Flags, commandCode CommandCode, applicationId ApplicationId, hopByHopId [4]byte, endToEndId [4]byte, avps ...Avp) Message {
 	return Message{
 		Version:       version,
 		Flags:         flags,
