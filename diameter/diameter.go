@@ -2,16 +2,25 @@ package diameter
 
 import (
 	"encoding/binary"
+	"errors"
 	"math"
 	"net"
 	"time"
 )
 
+// Flags represents the flags in a Diameter AVP.
 type Flags byte
+
+// Code represents the code in a Diameter AVP.
 type Code uint32
+
+// VendorId represents the vendor ID in a Diameter AVP.
 type VendorId uint32
+
+// avpData represents the data in a Diameter AVP.
 type avpData []byte
 
+// Avp represents a Diameter Attribute-Value Pair (AVP).
 type Avp struct {
 	Code     Code
 	Flags    Flags
@@ -21,6 +30,7 @@ type Avp struct {
 	padding  uint32
 }
 
+// WithFlags sets the flags for the AVP.
 func (a *Avp) WithFlags(flags Flags) *Avp {
 	if a == nil {
 		return nil
@@ -29,6 +39,7 @@ func (a *Avp) WithFlags(flags Flags) *Avp {
 	return a
 }
 
+// NewAvp creates a new AVP with the given code, flags, vendor ID, and data.
 func NewAvp(code Code, flags Flags, vendorId VendorId, avpData avpData) Avp {
 	padding := uint32(len(avpData) % 4)
 	if padding != 0 {
@@ -48,27 +59,32 @@ func NewAvp(code Code, flags Flags, vendorId VendorId, avpData avpData) Avp {
 	}
 }
 
+// NewAvpGroup creates a new grouped AVP with the given code, flags, vendor ID, and AVPs.
 func NewAvpGroup(code Code, flags Flags, vendorId VendorId, avps ...Avp) Avp {
 	_avps := Avps(avps)
 	return NewAvp(code, flags, vendorId, _avps.ToBytes())
 }
 
+// NewAvpString creates a new AVP with a string value.
 func NewAvpString(code Code, flags Flags, vendorId VendorId, value string) Avp {
 	return NewAvp(code, flags, vendorId, []byte(value))
 }
 
+// NewAvpUint32 creates a new AVP with a uint32 value.
 func NewAvpUint32(code Code, flags Flags, vendorId VendorId, value uint32) Avp {
 	buffer := make([]byte, 4)
 	binary.BigEndian.PutUint32(buffer, value)
 	return NewAvp(code, flags, vendorId, buffer)
 }
 
+// NewAvpUint64 creates a new AVP with a uint64 value.
 func NewAvpUint64(code Code, flags Flags, vendorId VendorId, value uint64) Avp {
 	buffer := make([]byte, 8)
 	binary.BigEndian.PutUint64(buffer, value)
 	return NewAvp(code, flags, vendorId, buffer)
 }
 
+// NewAvpFloat32 creates a new AVP with a float32 value.
 func NewAvpFloat32(code Code, flags Flags, vendorId VendorId, value float32) Avp {
 	bits := math.Float32bits(value)
 	buffer := make([]byte, 4)
@@ -76,6 +92,7 @@ func NewAvpFloat32(code Code, flags Flags, vendorId VendorId, value float32) Avp
 	return NewAvp(code, flags, vendorId, buffer)
 }
 
+// NewAvpFloat64 creates a new AVP with a float64 value.
 func NewAvpFloat64(code Code, flags Flags, vendorId VendorId, value float64) Avp {
 	bits := math.Float64bits(value)
 	buffer := make([]byte, 8)
@@ -83,6 +100,7 @@ func NewAvpFloat64(code Code, flags Flags, vendorId VendorId, value float64) Avp
 	return NewAvp(code, flags, vendorId, buffer)
 }
 
+// NewAvpNetIP creates a new AVP with a net.IP value.
 func NewAvpNetIP(code Code, flags Flags, vendorId VendorId, value net.IP) Avp {
 	if value.To4() != nil {
 		avpData := make([]byte, 6)
@@ -97,12 +115,14 @@ func NewAvpNetIP(code Code, flags Flags, vendorId VendorId, value net.IP) Avp {
 	}
 }
 
+// NewAvpTime creates a new AVP with a time.Time value.
 func NewAvpTime(code Code, flags Flags, vendorId VendorId, value time.Time) Avp {
 	buffer := make([]byte, 4)
 	binary.BigEndian.PutUint32(buffer, uint32(value.Unix()))
 	return NewAvp(code, flags, vendorId, buffer)
 }
 
+// ToBytes converts the AVP to a byte slice.
 func (a Avp) ToBytes() []byte {
 	bytes := make([]byte, a.length+a.padding)
 	binary.BigEndian.PutUint32(bytes, uint32(a.Code))
@@ -117,12 +137,15 @@ func (a Avp) ToBytes() []byte {
 	return bytes
 }
 
+// Avps represents a slice of AVPs.
 type Avps []Avp
 
+// NewAvps creates a new slice of AVPs.
 func NewAvps() Avps {
 	return make([]Avp, 0)
 }
 
+// ToBytes converts the slice of AVPs to a byte slice.
 func (a Avps) ToBytes() []byte {
 	bytes := make([]byte, 0)
 	for _, avp := range a {
@@ -131,66 +154,82 @@ func (a Avps) ToBytes() []byte {
 	return bytes
 }
 
+// Add adds a new AVP to the slice.
 func (a Avps) Add(code Code, flags Flags, vendorId VendorId, data avpData) Avps {
 	return append(a, NewAvp(code, flags, vendorId, data))
 }
 
+// AddAvps adds multiple AVPs to the slice.
 func (a Avps) AddAvps(avps ...Avp) Avps {
 	return append(a, avps...)
 }
 
+// AddString adds a new AVP with a string value to the slice.
 func (a Avps) AddString(code Code, flags Flags, vendorId VendorId, value string) Avps {
 	return append(a, NewAvpString(code, flags, vendorId, value))
 }
 
+// AddUint32 adds a new AVP with a uint32 value to the slice.
 func (a Avps) AddUint32(code Code, flags Flags, vendorId VendorId, value uint32) Avps {
 	return append(a, NewAvpUint32(code, flags, vendorId, value))
 }
 
+// AddUint64 adds a new AVP with a uint64 value to the slice.
 func (a Avps) AddUint64(code Code, flags Flags, vendorId VendorId, value uint64) Avps {
 	return append(a, NewAvpUint64(code, flags, vendorId, value))
 }
 
+// AddFloat32 adds a new AVP with a float32 value to the slice.
 func (a Avps) AddFloat32(code Code, flags Flags, vendorId VendorId, value float32) Avps {
 	return append(a, NewAvpFloat32(code, flags, vendorId, value))
 }
 
+// AddFloat64 adds a new AVP with a float64 value to the slice.
 func (a Avps) AddFloat64(code Code, flags Flags, vendorId VendorId, value float64) Avps {
 	return append(a, NewAvpFloat64(code, flags, vendorId, value))
 }
 
+// AddNetIP adds a new AVP with a net.IP value to the slice.
 func (a Avps) AddNetIP(code Code, flags Flags, vendorId VendorId, value net.IP) Avps {
 	return append(a, NewAvpNetIP(code, flags, vendorId, value))
 }
 
+// AddTime adds a new AVP with a time.Time value to the slice.
 func (a Avps) AddTime(code Code, flags Flags, vendorId VendorId, value time.Time) Avps {
 	return append(a, NewAvpTime(code, flags, vendorId, value))
 }
 
+// AddGroup adds a new grouped AVP to the slice.
 func (a Avps) AddGroup(code Code, flags Flags, vendorId VendorId, groupAvps ...Avp) Avps {
 	return append(a, NewAvpGroup(code, flags, vendorId, groupAvps...))
 }
 
+// ApplicationId represents the application ID in a Diameter message.
 type ApplicationId uint32
 
+// toBytes converts the ApplicationId to a byte slice.
 func (a ApplicationId) toBytes() []byte {
 	bytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(bytes, uint32(a))
 	return bytes
 }
 
+// writeUInt24 writes a uint32 value as a 3-byte slice.
 func writeUInt24(value uint32) []byte {
 	bytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(bytes, value)
 	return bytes[1:]
 }
 
+// CommandCode represents the command code in a Diameter message.
 type CommandCode uint32
 
+// toBytes converts the CommandCode to a byte slice.
 func (c CommandCode) toBytes() []byte {
 	return writeUInt24(uint32(c))
 }
 
+// Message represents a Diameter message.
 type Message struct {
 	Version       byte
 	Flags         Flags
@@ -201,6 +240,7 @@ type Message struct {
 	Avps          Avps
 }
 
+// length calculates the length of the Diameter message.
 func (m Message) length() uint32 {
 	length := uint32(20)
 	for _, avp := range m.Avps {
@@ -209,6 +249,7 @@ func (m Message) length() uint32 {
 	return length
 }
 
+// NewMessage creates a new Diameter message.
 func NewMessage(version byte, flags Flags, commandCode CommandCode, applicationId ApplicationId, hopByHopId [4]byte, endToEndId [4]byte, avps ...Avp) Message {
 	return Message{
 		Version:       version,
@@ -221,6 +262,7 @@ func NewMessage(version byte, flags Flags, commandCode CommandCode, applicationI
 	}
 }
 
+// ToBytes converts the Diameter message to a byte slice.
 func (message Message) ToBytes() []byte {
 	bytes := make([]byte, 0)
 	bytes = append(bytes, message.Version)
@@ -234,6 +276,7 @@ func (message Message) ToBytes() []byte {
 	return bytes
 }
 
+// Get retrieves all AVPs with the given code and vendor ID.
 func (a Avps) Get(code Code, vendorId VendorId) Avps {
 	filteredAvps := NewAvps()
 	for _, avp := range a {
@@ -244,6 +287,7 @@ func (a Avps) Get(code Code, vendorId VendorId) Avps {
 	return filteredAvps
 }
 
+// GetFirst retrieves the first AVP with the given code and vendor ID.
 func (a Avps) GetFirst(code Code, vendorId VendorId) *Avp {
 	for _, avp := range a {
 		if avp.Code == code && avp.VendorId == vendorId {
@@ -253,6 +297,7 @@ func (a Avps) GetFirst(code Code, vendorId VendorId) *Avp {
 	return nil
 }
 
+// ToData converts the AVP to a byte slice.
 func (a *Avp) ToData() []byte {
 	if a == nil {
 		return nil
@@ -260,6 +305,7 @@ func (a *Avp) ToData() []byte {
 	return a.Data
 }
 
+// ToString converts the AVP to a string.
 func (a *Avp) ToString() *string {
 	if a == nil || a.Data == nil {
 		return nil
@@ -268,6 +314,7 @@ func (a *Avp) ToString() *string {
 	return &value
 }
 
+// ToStringOrDefault converts the AVP to a string or returns a default value.
 func (a *Avp) ToStringOrDefault() string {
 	value := a.ToString()
 	if value == nil {
@@ -277,6 +324,7 @@ func (a *Avp) ToStringOrDefault() string {
 	return *value
 }
 
+// ToUint32 converts the AVP to a uint32.
 func (a *Avp) ToUint32() *uint32 {
 	if a == nil || a.Data == nil {
 		return nil
@@ -285,6 +333,7 @@ func (a *Avp) ToUint32() *uint32 {
 	return &value
 }
 
+// ToUint32OrDefault converts the AVP to a uint32 or returns a default value.
 func (a *Avp) ToUint32OrDefault() uint32 {
 	value := a.ToUint32()
 	if value == nil {
@@ -294,6 +343,7 @@ func (a *Avp) ToUint32OrDefault() uint32 {
 	return *value
 }
 
+// ToUint64 converts the AVP to a uint64.
 func (a *Avp) ToUint64() *uint64 {
 	if a == nil || a.Data == nil {
 		return nil
@@ -302,6 +352,7 @@ func (a *Avp) ToUint64() *uint64 {
 	return &value
 }
 
+// ToUint64OrDefault converts the AVP to a uint64 or returns a default value.
 func (a *Avp) ToUint64OrDefault() uint64 {
 	value := a.ToUint64()
 	if value == nil {
@@ -311,6 +362,7 @@ func (a *Avp) ToUint64OrDefault() uint64 {
 	return *value
 }
 
+// ToFloat32 converts the AVP to a float32.
 func (a *Avp) ToFloat32() *float32 {
 	if a == nil || a.Data == nil {
 		return nil
@@ -320,6 +372,7 @@ func (a *Avp) ToFloat32() *float32 {
 	return &value
 }
 
+// ToFloat32OrDefault converts the AVP to a float32 or returns a default value.
 func (a *Avp) ToFloat32OrDefault() float32 {
 	value := a.ToFloat32()
 	if value == nil {
@@ -329,6 +382,7 @@ func (a *Avp) ToFloat32OrDefault() float32 {
 	return *value
 }
 
+// ToFloat64 converts the AVP to a float64.
 func (a *Avp) ToFloat64() *float64 {
 	if a == nil || a.Data == nil {
 		return nil
@@ -338,6 +392,7 @@ func (a *Avp) ToFloat64() *float64 {
 	return &value
 }
 
+// ToFloat64OrDefault converts the AVP to a float64 or returns a default value.
 func (a *Avp) ToFloat64OrDefault() float64 {
 	value := a.ToFloat64()
 	if value == nil {
@@ -347,6 +402,7 @@ func (a *Avp) ToFloat64OrDefault() float64 {
 	return *value
 }
 
+// ToNetIP converts the AVP to a net.IP.
 func (a *Avp) ToNetIP() *net.IP {
 	if a == nil || a.Data == nil {
 		return nil
@@ -360,6 +416,7 @@ func (a *Avp) ToNetIP() *net.IP {
 	}
 }
 
+// ToNetIPOrDefault converts the AVP to a net.IP or returns a default value.
 func (a *Avp) ToNetIPOrDefault() net.IP {
 	value := a.ToNetIP()
 	if value == nil {
@@ -369,6 +426,7 @@ func (a *Avp) ToNetIPOrDefault() net.IP {
 	return *value
 }
 
+// ToTime converts the AVP to a time.Time.
 func (a *Avp) ToTime() *time.Time {
 	if a == nil || a.Data == nil {
 		return nil
@@ -378,6 +436,7 @@ func (a *Avp) ToTime() *time.Time {
 	return &value
 }
 
+// ToTimeOrDefault converts the AVP to a time.Time or returns a default value.
 func (a *Avp) ToTimeOrDefault() time.Time {
 	value := a.ToTime()
 	if value == nil {
@@ -387,6 +446,7 @@ func (a *Avp) ToTimeOrDefault() time.Time {
 	return *value
 }
 
+// ToGroup converts the AVP to a grouped AVP.
 func (a *Avp) ToGroup() Avps {
 	if a == nil || a.Data == nil {
 		return NewAvps()
@@ -394,6 +454,7 @@ func (a *Avp) ToGroup() Avps {
 	return readAvps(a.Data)
 }
 
+// readAvps reads a byte slice and converts it to a slice of AVPs.
 func readAvps(bytes []byte) Avps {
 	offset := 0
 	avps := NewAvps()
@@ -417,6 +478,7 @@ func readAvps(bytes []byte) Avps {
 	return avps
 }
 
+// readUInt24 reads a 3-byte slice and converts it to a uint32.
 func readUInt24(bytes []byte) uint32 {
 	if len(bytes) == 3 {
 		bytes = append([]byte{0}, bytes[:]...)
@@ -424,9 +486,10 @@ func readUInt24(bytes []byte) uint32 {
 	return binary.BigEndian.Uint32(bytes)
 }
 
-func ReadMessage(bytes []byte) *Message {
+// ReadMessage reads a byte slice and converts it to a Diameter message.
+func ReadMessage(bytes []byte) (*Message, error) {
 	if len(bytes) < 20 {
-		return nil
+		return nil, errors.New("invalid message length")
 	}
 	hopByHopId := [4]byte{}
 	copy(hopByHopId[:], bytes[12:16])
@@ -441,5 +504,5 @@ func ReadMessage(bytes []byte) *Message {
 		EndToEndId:    endToEndId,
 		Avps:          readAvps(bytes[20:]),
 	}
-	return &message
+	return &message, nil
 }

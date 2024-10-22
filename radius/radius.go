@@ -2,14 +2,21 @@ package radius
 
 import (
 	"encoding/binary"
+	"errors"
 	"net"
 	"time"
 )
 
+// AttributeType represents the type of an attribute in a RADIUS AVP.
 type AttributeType byte
+
+// VendorId represents the vendor ID in a RADIUS AVP.
 type VendorId uint32
+
+// avpData represents the data in a RADIUS AVP.
 type avpData []byte
 
+// Avp represents a RADIUS Attribute-Value Pair (AVP).
 type Avp struct {
 	Type     AttributeType
 	length   byte
@@ -17,6 +24,7 @@ type Avp struct {
 	Data     avpData
 }
 
+// NewAvp creates a new AVP with the given attribute type, vendor ID, and data.
 func NewAvp(attributeType AttributeType, vendorId VendorId, avpData avpData) Avp {
 	a := Avp{
 		Type: attributeType,
@@ -32,26 +40,31 @@ func NewAvp(attributeType AttributeType, vendorId VendorId, avpData avpData) Avp
 	return a
 }
 
+// NewAvpString creates a new AVP with a string value.
 func NewAvpString(attributeType AttributeType, vendorId VendorId, value string) Avp {
 	return NewAvp(attributeType, vendorId, []byte(value))
 }
 
+// NewAvpUint32 creates a new AVP with a uint32 value.
 func NewAvpUint32(attributeType AttributeType, vendorId VendorId, value uint32) Avp {
 	buffer := make([]byte, 4)
 	binary.BigEndian.PutUint32(buffer, value)
 	return NewAvp(attributeType, vendorId, buffer)
 }
 
+// NewAvpNetIP creates a new AVP with a net.IP value.
 func NewAvpNetIP(attributeType AttributeType, vendorId VendorId, value net.IP) Avp {
 	return NewAvp(attributeType, vendorId, avpData(value.To4()))
 }
 
+// NewAvpTime creates a new AVP with a time.Time value.
 func NewAvpTime(attributeType AttributeType, vendorId VendorId, value time.Time) Avp {
 	buffer := make([]byte, 4)
 	binary.BigEndian.PutUint32(buffer, uint32(value.Unix()))
 	return NewAvp(attributeType, vendorId, buffer)
 }
 
+// ToBytes converts the AVP to a byte slice.
 func (a Avp) ToBytes() []byte {
 	bytes := make([]byte, 0)
 	if a.VendorId == 0 {
@@ -70,36 +83,45 @@ func (a Avp) ToBytes() []byte {
 	return bytes
 }
 
+// Avps represents a slice of AVPs.
 type Avps []Avp
 
+// NewAvps creates a new slice of AVPs.
 func NewAvps() Avps {
 	return make(Avps, 0)
 }
 
+// Add adds a new AVP to the slice.
 func (a Avps) Add(attributeType AttributeType, vendorId VendorId, data avpData) Avps {
 	return append(a, NewAvp(attributeType, vendorId, data))
 }
 
+// AddAvps adds multiple AVPs to the slice.
 func (a Avps) AddAvps(avps ...Avp) Avps {
 	return append(a, avps...)
 }
 
+// AddString adds a new AVP with a string value to the slice.
 func (a Avps) AddString(attributeType AttributeType, vendorId VendorId, value string) Avps {
 	return append(a, NewAvpString(attributeType, vendorId, value))
 }
 
+// AddUint32 adds a new AVP with a uint32 value to the slice.
 func (a Avps) AddUint32(attributeType AttributeType, vendorId VendorId, value uint32) Avps {
 	return append(a, NewAvpUint32(attributeType, vendorId, value))
 }
 
+// AddNetIP adds a new AVP with a net.IP value to the slice.
 func (a Avps) AddNetIP(attributeType AttributeType, vendorId VendorId, value net.IP) Avps {
 	return append(a, NewAvpNetIP(attributeType, vendorId, value))
 }
 
+// AddTime adds a new AVP with a time.Time value to the slice.
 func (a Avps) AddTime(attributeType AttributeType, vendorId VendorId, value time.Time) Avps {
 	return append(a, NewAvpTime(attributeType, vendorId, value))
 }
 
+// ToBytes converts the slice of AVPs to a byte slice.
 func (a Avps) ToBytes() []byte {
 	bytes := make([]byte, 0)
 	for _, avp := range a {
@@ -108,8 +130,10 @@ func (a Avps) ToBytes() []byte {
 	return bytes
 }
 
+// Code represents the code in a RADIUS message.
 type Code uint32
 
+// Message represents a RADIUS message.
 type Message struct {
 	Code          Code
 	Identifier    byte
@@ -117,6 +141,7 @@ type Message struct {
 	Avps          Avps
 }
 
+// length calculates the length of the RADIUS message.
 func (m Message) length() uint16 {
 	length := uint16(20)
 	for _, avp := range m.Avps {
@@ -125,6 +150,7 @@ func (m Message) length() uint16 {
 	return length
 }
 
+// NewMessage creates a new RADIUS message.
 func NewMessage(code Code, identifier byte, authenticator [16]byte, avps ...Avp) Message {
 	length := uint16(20)
 	for _, avp := range avps {
@@ -138,6 +164,7 @@ func NewMessage(code Code, identifier byte, authenticator [16]byte, avps ...Avp)
 	}
 }
 
+// ToBytes converts the RADIUS message to a byte slice.
 func (m Message) ToBytes() []byte {
 	bytes := make([]byte, 0)
 	bytes = append(bytes, byte(m.Code))
@@ -150,6 +177,7 @@ func (m Message) ToBytes() []byte {
 	return bytes
 }
 
+// Get retrieves all AVPs with the given attribute type and vendor ID.
 func (a Avps) Get(attributeType AttributeType, vendorId VendorId) []Avp {
 	if a == nil {
 		return nil
@@ -163,6 +191,7 @@ func (a Avps) Get(attributeType AttributeType, vendorId VendorId) []Avp {
 	return filteredAvps
 }
 
+// GetFirst retrieves the first AVP with the given attribute type and vendor ID.
 func (a Avps) GetFirst(attributeType AttributeType, vendorId VendorId) *Avp {
 	for _, avp := range a {
 		if avp.Type == attributeType && avp.VendorId == vendorId {
@@ -172,6 +201,7 @@ func (a Avps) GetFirst(attributeType AttributeType, vendorId VendorId) *Avp {
 	return nil
 }
 
+// ToData converts the AVP to a byte slice.
 func (a *Avp) ToData() []byte {
 	if a == nil {
 		return nil
@@ -179,6 +209,7 @@ func (a *Avp) ToData() []byte {
 	return a.Data
 }
 
+// ToString converts the AVP to a string.
 func (a *Avp) ToString() *string {
 	if a == nil || a.Data == nil {
 		return nil
@@ -187,6 +218,7 @@ func (a *Avp) ToString() *string {
 	return &value
 }
 
+// ToStringOrDefault converts the AVP to a string or returns a default value.
 func (a *Avp) ToStringOrDefault() string {
 	value := a.ToString()
 	if value == nil {
@@ -196,6 +228,7 @@ func (a *Avp) ToStringOrDefault() string {
 	return *value
 }
 
+// ToUint32 converts the AVP to a uint32.
 func (a *Avp) ToUint32() *uint32 {
 	if a == nil || a.Data == nil {
 		return nil
@@ -204,6 +237,7 @@ func (a *Avp) ToUint32() *uint32 {
 	return &value
 }
 
+// ToUint32OrDefault converts the AVP to a uint32 or returns a default value.
 func (a *Avp) ToUint32OrDefault() uint32 {
 	value := a.ToUint32()
 	if value == nil {
@@ -213,6 +247,7 @@ func (a *Avp) ToUint32OrDefault() uint32 {
 	return *value
 }
 
+// ToNetIP converts the AVP to a net.IP.
 func (a *Avp) ToNetIP() *net.IP {
 	if a == nil || a.Data == nil {
 		return nil
@@ -221,6 +256,7 @@ func (a *Avp) ToNetIP() *net.IP {
 	return &value
 }
 
+// ToNetIPOrDefault converts the AVP to a net.IP or returns a default value.
 func (a *Avp) ToNetIPOrDefault() net.IP {
 	value := a.ToNetIP()
 	if value == nil {
@@ -230,6 +266,7 @@ func (a *Avp) ToNetIPOrDefault() net.IP {
 	return *value
 }
 
+// ToTime converts the AVP to a time.Time.
 func (a *Avp) ToTime() *time.Time {
 	if a == nil || a.Data == nil {
 		return nil
@@ -239,6 +276,7 @@ func (a *Avp) ToTime() *time.Time {
 	return &value
 }
 
+// ToTimeOrDefault converts the AVP to a time.Time or returns a default value.
 func (a *Avp) ToTimeOrDefault() time.Time {
 	value := a.ToTime()
 	if value == nil {
@@ -248,6 +286,7 @@ func (a *Avp) ToTimeOrDefault() time.Time {
 	return *value
 }
 
+// readAvps reads a byte slice and converts it to a slice of AVPs.
 func readAvps(bytes []byte) Avps {
 	offset := 0
 	avps := NewAvps()
@@ -271,9 +310,10 @@ func readAvps(bytes []byte) Avps {
 	return avps
 }
 
-func ReadMessage(bytes []byte) *Message {
+// ReadMessage reads a byte slice and converts it to a RADIUS message.
+func ReadMessage(bytes []byte) (*Message, error) {
 	if len(bytes) < 20 {
-		return nil
+		return nil, errors.New("invalid message length")
 	}
 	authenticator := [16]byte{}
 	copy(authenticator[:], bytes[4:20])
@@ -283,5 +323,5 @@ func ReadMessage(bytes []byte) *Message {
 		Authenticator: authenticator,
 		Avps:          readAvps(bytes[20:]),
 	}
-	return &message
+	return &message, nil
 }
