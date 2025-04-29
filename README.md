@@ -24,10 +24,10 @@ avps = avps.AddNetIP(8, 0, mandatoryFlags, ipAddress)
 message := diameter.NewMessage(1, requestFlags, 265, 1, [4]byte{0, 0, 0, 0}, [4]byte{0, 0, 0, 0}, avps...)
 bytes := message.ToBytes()
 
-message = *diameter.ReadMessage(bytes)
-avp := message.Avps.GetFirst(258, 0)
+newMessage, err := diameter.ReadMessage(bytes)
+avp := newMessage.Avps.GetFirst(258, 0)
 assert.Equal(t, uint32(1), *avp.ToUint32())
-avp = message.Avps.GetFirst(8, 0)
+avp = newMessage.Avps.GetFirst(8, 0)
 assert.Equal(t, ipAddress, *avp.ToNetIP())
 ```
 

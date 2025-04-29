@@ -1,0 +1,48 @@
+version: '2'
+linters:
+  enable:
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - containedctx
+    - contextcheck
+    - copyloopvar
+    - decorder
+    - dogsled
+    - err113
+    - exhaustive
+    - fatcontext
+    - gocheckcompilerdirectives
+    - goconst
+    - gomoddirectives
+    - govet
+    - iface
+    - ineffassign
+    - interfacebloat
+    - intrange
+    - makezero
+    - mirror
+    - misspell
+    - nestif
+    - nilerr
+    - nilnesserr
+    - noctx
+    - nonamedreturns
+    - nosprintfhostport
+    - protogetter
+    - staticcheck
+    - tagalign
+    - testifylint
+    - unconvert
+    - unparam
+    - unused
+    - wastedassign
+    - wsl
+
+  settings:
+    gomoddirectives:
+      go-version-pattern: '1\.\d+(\.0)?$'
+      replace-local: true
+      replace-allow-list:
+        - google.golang.org/genproto

@@ -37,6 +37,7 @@ func NewAvp(attributeType AttributeType, vendorId VendorId, avpData avpData) Avp
 		a.length = byte(len(avpData) + 8)
 		a.Data = avpData
 	}
+	
 	return a
 }
 
@@ -49,6 +50,7 @@ func NewAvpString(attributeType AttributeType, vendorId VendorId, value string) 
 func NewAvpUint32(attributeType AttributeType, vendorId VendorId, value uint32) Avp {
 	buffer := make([]byte, 4)
 	binary.BigEndian.PutUint32(buffer, value)
+
 	return NewAvp(attributeType, vendorId, buffer)
 }
 
@@ -61,6 +63,7 @@ func NewAvpNetIP(attributeType AttributeType, vendorId VendorId, value net.IP) A
 func NewAvpTime(attributeType AttributeType, vendorId VendorId, value time.Time) Avp {
 	buffer := make([]byte, 4)
 	binary.BigEndian.PutUint32(buffer, uint32(value.Unix()))
+
 	return NewAvp(attributeType, vendorId, buffer)
 }
 
@@ -79,7 +82,9 @@ func (a Avp) ToBytes() []byte {
 		bytes = append(bytes, byte(a.Type))
 		bytes = append(bytes, byte(len(a.Data)+2))
 	}
+
 	bytes = append(bytes, a.Data...)
+
 	return bytes
 }
 
@@ -127,6 +132,7 @@ func (a Avps) ToBytes() []byte {
 	for _, avp := range a {
 		bytes = append(bytes, avp.ToBytes()...)
 	}
+
 	return bytes
 }
 
@@ -147,6 +153,7 @@ func (m Message) length() uint16 {
 	for _, avp := range m.Avps {
 		length += uint16(avp.length)
 	}
+
 	return length
 }
 
@@ -156,6 +163,7 @@ func NewMessage(code Code, identifier byte, authenticator [16]byte, avps ...Avp)
 	for _, avp := range avps {
 		length += uint16(avp.length)
 	}
+	
 	return Message{
 		Code:          code,
 		Identifier:    identifier,
@@ -174,6 +182,7 @@ func (m Message) ToBytes() []byte {
 	bytes = append(bytes, buffer...)
 	bytes = append(bytes, m.Authenticator[:]...)
 	bytes = append(bytes, m.Avps.ToBytes()...)
+
 	return bytes
 }
 
@@ -182,12 +191,15 @@ func (a Avps) Get(attributeType AttributeType, vendorId VendorId) []Avp {
 	if a == nil {
 		return nil
 	}
+
 	filteredAvps := NewAvps()
+
 	for _, avp := range a {
 		if avp.Type == attributeType && avp.VendorId == vendorId {
 			filteredAvps = append(filteredAvps, avp)
 		}
 	}
+
 	return filteredAvps
 }
 
@@ -198,6 +210,7 @@ func (a Avps) GetFirst(attributeType AttributeType, vendorId VendorId) *Avp {
 			return &avp
 		}
 	}
+
 	return nil
 }
 
@@ -206,6 +219,7 @@ func (a *Avp) ToData() []byte {
 	if a == nil {
 		return nil
 	}
+
 	return a.Data
 }
 
@@ -214,7 +228,9 @@ func (a *Avp) ToString() *string {
 	if a == nil || a.Data == nil {
 		return nil
 	}
+
 	value := string(a.Data)
+
 	return &value
 }
 
@@ -225,6 +241,7 @@ func (a *Avp) ToStringOrDefault() string {
 		var value string
 		return value
 	}
+
 	return *value
 }
 
@@ -233,7 +250,9 @@ func (a *Avp) ToUint32() *uint32 {
 	if a == nil || a.Data == nil {
 		return nil
 	}
+
 	value := binary.BigEndian.Uint32(a.Data)
+
 	return &value
 }
 
@@ -244,6 +263,7 @@ func (a *Avp) ToUint32OrDefault() uint32 {
 		var value uint32
 		return value
 	}
+
 	return *value
 }
 
@@ -252,7 +272,9 @@ func (a *Avp) ToNetIP() *net.IP {
 	if a == nil || a.Data == nil {
 		return nil
 	}
+
 	value := net.IP(a.Data)
+
 	return &value
 }
 
@@ -263,6 +285,7 @@ func (a *Avp) ToNetIPOrDefault() net.IP {
 		var value net.IP
 		return value
 	}
+
 	return *value
 }
 
@@ -271,8 +294,10 @@ func (a *Avp) ToTime() *time.Time {
 	if a == nil || a.Data == nil {
 		return nil
 	}
+
 	timestamp := int64(binary.BigEndian.Uint32(a.Data))
 	value := time.Unix(timestamp, 0)
+
 	return &value
 }
 
@@ -283,6 +308,7 @@ func (a *Avp) ToTimeOrDefault() time.Time {
 		var value time.Time
 		return value
 	}
+
 	return *value
 }
 
@@ -290,11 +316,15 @@ func (a *Avp) ToTimeOrDefault() time.Time {
 func readAvps(bytes []byte) Avps {
 	offset := 0
 	avps := NewAvps()
+
 	for offset < len(bytes) {
 		attributeType := AttributeType(bytes[offset])
 		length := bytes[offset+1]
+
 		var avpData avpData
+
 		var vendorId VendorId
+		
 		if attributeType == 26 {
 			vendorId = VendorId(binary.BigEndian.Uint32(bytes[offset+2 : offset+6]))
 			attributeType = AttributeType(bytes[offset+6])
@@ -304,17 +334,22 @@ func readAvps(bytes []byte) Avps {
 			avpLength := bytes[offset+1]
 			avpData = bytes[offset+2 : offset+int(avpLength)]
 		}
+		
 		avps = append(avps, NewAvp(attributeType, vendorId, avpData))
 		offset += int(length)
 	}
+
 	return avps
 }
+
+var errInvalidMessageLength = errors.New("invalid message length")
 
 // ReadMessage reads a byte slice and converts it to a RADIUS message.
 func ReadMessage(bytes []byte) (*Message, error) {
 	if len(bytes) < 20 {
-		return nil, errors.New("invalid message length")
+		return nil, errInvalidMessageLength
 	}
+
 	authenticator := [16]byte{}
 	copy(authenticator[:], bytes[4:20])
 	message := Message{
@@ -323,5 +358,6 @@ func ReadMessage(bytes []byte) (*Message, error) {
 		Authenticator: authenticator,
 		Avps:          readAvps(bytes[20:]),
 	}
+
 	return &message, nil
 }
